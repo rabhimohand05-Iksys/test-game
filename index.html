@@ -8393,21 +8393,17 @@ function playRewardEffect() {
 
 // ===== مشاهدة الإعلان =====
 function watchVideoAd() {
-    if (typeof HPFAd !== 'undefined' && HPFAd.showAd) {
-        HPFAd.showAd();
-        // انتظر 3 ثواني ثم أعطِ المكافأة (بعد مشاهدة الإعلان)
-        setTimeout(() => {
-            if (typeof playerWallet !== 'undefined') {
-                playerWallet.gems += 6;
-                if (typeof updatePlayerDisplay === 'function') updatePlayerDisplay();
-                if (typeof saveProgress === 'function') saveProgress();
-                alert('🎉 +6 جواهر! شكراً للمشاهدة');
-            }
-        }, 3000);
-    } else {
-        alert('⚠️ الإعلان غير متاح حالياً. حاول مرة أخرى.');
+    // فتح رابط Smartlink في نافذة جديدة
+    window.open('https://www.profitablecpmratenetwork.com/m/nrckx70i1?key=4fe306a8fd1621963f11b0b67d318463', '_blank');
+    
+    // إعطاء الجواهر فوراً (بدون انتظار)
+    if (typeof playerWallet !== 'undefined') {
+        playerWallet.gems += 6;
+        if (typeof updatePlayerDisplay === 'function') updatePlayerDisplay();
+        if (typeof saveProgress === 'function') saveProgress();
+        alert('🎉 +6 جواهر! شكراً لك');
     }
-        }
+            }
 // ===== إضافة الزر (دائماً) =====
 function addAdButtonPermanently() {
     const panel = document.getElementById('paymentFeaturesPanel');

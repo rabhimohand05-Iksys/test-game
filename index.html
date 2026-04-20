@@ -1848,6 +1848,9 @@
         <div class="result-box" id="resultBox"></div>
     </div>
 
+    <!-- كود تحميل شبكة الإعلانات -->
+<script src="https://www.highperformanceformat.com/9eb4d899ad82225e662fb08e60e1e14b/invoke.js"></script>
+
     <script>
         // ===== إعدادات Firebase =====
         const firebaseConfig = {
@@ -8389,15 +8392,21 @@ function playRewardEffect() {
 
 // ===== مشاهدة الإعلان =====
 function watchVideoAd() {
-    if (confirm('🎬 مشاهدة إعلان والحصول على 6 جواهر؟')) {
-        playerWallet.gems += 6;
-        updatePlayerDisplay();
-        saveProgress();
-        playRewardEffect();
-        showToastMessage('🎁 +6 جواهر! شكراً للمشاهدة', '#4CAF50', 3000);
+    if (typeof HPFAd !== 'undefined' && HPFAd.showAd) {
+        HPFAd.showAd();
+        // انتظر 3 ثواني ثم أعطِ المكافأة (بعد مشاهدة الإعلان)
+        setTimeout(() => {
+            if (typeof playerWallet !== 'undefined') {
+                playerWallet.gems += 6;
+                if (typeof updatePlayerDisplay === 'function') updatePlayerDisplay();
+                if (typeof saveProgress === 'function') saveProgress();
+                alert('🎉 +6 جواهر! شكراً للمشاهدة');
+            }
+        }, 3000);
+    } else {
+        alert('⚠️ الإعلان غير متاح حالياً. حاول مرة أخرى.');
     }
-}
-
+        }
 // ===== إضافة الزر (دائماً) =====
 function addAdButtonPermanently() {
     const panel = document.getElementById('paymentFeaturesPanel');

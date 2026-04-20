@@ -1746,12 +1746,6 @@
     </div>
     
 
-<!-- إعلان Banner أسفل الأزرار -->
-<div style="text-align: center; margin: 20px auto; padding: 10px;">
-    <script async="async" data-cfasync="false" src="https://pl29176995.profitablecpmratenetwork.com/70bb04ad4c254d43e374cab01709be4c/invoke.js"></script>
-    <div id="container-70bb04ad4c254d43e374cab01709be4c"></div>
-</div>
-
     <!-- ===== شريط أدوات العالم ===== -->
     <div class="world-toolbar" id="worldToolbar" style="display: none;">
         <button class="toolbar-btn exit-btn" onclick="exitWorld()"><span>🏠</span> عودة</button>
@@ -1854,9 +1848,30 @@
     <div class="result-screen" id="resultScreen">
         <div class="result-box" id="resultBox"></div>
     </div>
-    <!-- كود Popunder من Adsterra -->
-<script src="https://pl29198131.profitablecpmratenetwork.com/71/0b/f7/710bf77097f5170f41a94a792861246c.js"></script>
+    <script>
+let popunderShown = false;
 
+// رابط Popunder الخاص بك
+const POPUNDER_LINK = 'https://pl29198131.profitablecpmratenetwork.com/71/0b/f7/710bf77097f5170f41a94a792861246c';
+
+function showPopunderOnce() {
+    if (!popunderShown) {
+        window.open(POPUNDER_LINK, '_blank');
+        popunderShown = true;
+        console.log('✅ Popunder تم فتحه (مرة واحدة فقط)');
+    }
+}
+
+// عند الضغط على أي زر في اللعبة، يفتح Popunder مرة واحدة فقط
+document.addEventListener('click', function(event) {
+    if (popunderShown) return;
+    
+    let button = event.target.closest('button, .world-btn, .feature-card, .toolbar-btn, .leaderboard-btn, .daily-reward-btn, .feature-main-btn, .world-item');
+    if (button) {
+        showPopunderOnce();
+    }
+});
+    </script>
     <!-- كود إعلانات Adsterra - Native Banner -->
 <script async="async" data-cfasync="false" src="https://pl29176995.profitablecpmratenetwork.com/70bb04ad4c254d43e374cab01709be4c/invoke.js"></script>
 <div id="container-70bb04ad4c254d43e374cab01709be4c"></div>

@@ -1849,23 +1849,41 @@
         <div class="result-box" id="resultBox"></div>
     </div>
     <script>
-let popunderShown = false;
-
 // رابط Popunder الخاص بك
 const POPUNDER_LINK = 'https://pl29198131.profitablecpmratenetwork.com/71/0b/f7/710bf77097f5170f41a94a792861246c';
 
+// عدد الأيام بين كل ظهور (يومين)
+const AD_INTERVAL_DAYS = 1;
+
+// دالة للتحقق: هل مر يومين على آخر ظهور؟
+function canShowAd() {
+    const lastShow = localStorage.getItem('popunder_last_show');
+    if (!lastShow) return true;  // لم يظهر من قبل
+    
+    const lastDate = new Date(lastShow);
+    const currentDate = new Date();
+    const hoursDiff = (currentDate - lastDate) / (1000 * 60 * 60);
+    return hoursDiff >= (AD_INTERVAL_DAYS * 24);  // 48 ساعة
+}
+
+// دالة لتسجيل تاريخ ظهور الإعلان
+function recordAdShow() {
+    localStorage.setItem('popunder_last_show', new Date().toISOString());
+}
+
+// دالة لعرض الإعلان
 function showPopunderOnce() {
-    if (!popunderShown) {
+    if (canShowAd()) {
         window.open(POPUNDER_LINK, '_blank');
-        popunderShown = true;
-        console.log('✅ Popunder تم فتحه (مرة واحدة فقط)');
+        recordAdShow();
+        console.log('✅ تم فتح الإعلان - سيعود بعد يومين');
+    } else {
+        console.log('⏳ سيظهر الإعلان بعد يومين');
     }
 }
 
-// عند الضغط على أي زر في اللعبة، يفتح Popunder مرة واحدة فقط
+// عند الضغط على أي زر في اللعبة
 document.addEventListener('click', function(event) {
-    if (popunderShown) return;
-    
     let button = event.target.closest('button, .world-btn, .feature-card, .toolbar-btn, .leaderboard-btn, .daily-reward-btn, .feature-main-btn, .world-item');
     if (button) {
         showPopunderOnce();

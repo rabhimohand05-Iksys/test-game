@@ -6948,7 +6948,7 @@ const dilemmaWorlds = [
         id: 3, 
         name: 'جبل الجحيم', 
         icon: '🌋',
-        capacity: 6,       // أقل
+        capacity: 10,       // أقل
         time: 40,          // أقل
         itemsCount: 14,    // أكثر
         targetPoints: 500, // أكثر
@@ -8399,17 +8399,80 @@ function playRewardEffect() {
     setTimeout(() => document.body.style.transition = '', 250);
 }
 
-// ===== مشاهدة الإعلان =====
+// متغير لحساب عدد مرات مشاهدة الإعلان
+let adWatchCount = 0;
+const MAX_AD_WATCH = 3;
+const RESET_DAYS = 3; // كل 3 أيام
+
 function watchVideoAd() {
+    // التحقق: هل تجاوز الحد الأقصى؟
+    if (adWatchCount >= MAX_AD_WATCH) {
+        const remainingDays = getRemainingDays();
+        alert(`⚠️ لقد استنفدت جميع محاولاتك (${MAX_AD_WATCH}/3)\n💡 يمكنك المحاولة مرة أخرى بعد ${remainingDays} يوم`);
+        return;
+    }
+    
+    // فتح الإعلان
     window.open('https://www.profitablecpmratenetwork.com/nrckx70i1?key=4fe306a8fd1621963f11b0b67d318463', '_blank');
     
+    // إضافة الجواهر وزيادة العداد
     if (typeof playerWallet !== 'undefined') {
         playerWallet.gems += 6;
+        adWatchCount++;
+        
         if (typeof updatePlayerDisplay === 'function') updatePlayerDisplay();
         if (typeof saveProgress === 'function') saveProgress();
-        alert('🎉 +6 جواهر! شكراً لك');
+        
+        // حفظ العداد وتاريخ آخر مشاهدة
+        localStorage.setItem('adWatchCount', adWatchCount);
+        localStorage.setItem('lastAdWatchDate', new Date().toISOString());
+        
+        alert(`🎉 +6 جواهر! (${adWatchCount}/${MAX_AD_WATCH})`);
     }
 }
+
+// حساب عدد الأيام المتبقية لإعادة التعيين
+function getRemainingDays() {
+    const lastDate = localStorage.getItem('lastAdWatchDate');
+    if (!lastDate) return 0;
+    
+    const last = new Date(lastDate);
+    const now = new Date();
+    const diffTime = Math.abs(now - last);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays >= RESET_DAYS) return 0;
+    return RESET_DAYS - diffDays;
+}
+
+// التحقق من إعادة التعيين كل 3 أيام
+function checkAndResetAdCount() {
+    const lastDate = localStorage.getItem('lastAdWatchDate');
+    if (!lastDate) return;
+    
+    const last = new Date(lastDate);
+    const now = new Date();
+    const diffTime = Math.abs(now - last);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays >= RESET_DAYS) {
+        adWatchCount = 0;
+        localStorage.setItem('adWatchCount', 0);
+        console.log('✅ تم إعادة تعيين عدد المشاهدات (كل 3 أيام)');
+    }
+}
+
+// تحميل العداد المحفوظ عند بدء اللعبة
+function loadAdWatchCount() {
+    const saved = localStorage.getItem('adWatchCount');
+    if (saved !== null) {
+        adWatchCount = parseInt(saved);
+    }
+    checkAndResetAdCount();
+}
+
+// استدعاء هذه الدوال عند تحميل الصفحة
+loadAdWatchCount();
 // ===== إضافة الزر (دائماً) =====
 function addAdButtonPermanently() {
     const panel = document.getElementById('paymentFeaturesPanel');

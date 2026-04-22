@@ -7002,7 +7002,7 @@ const dilemmaWorlds = [
         capacity: 9,       // أقصى صعوبة
         time: 30,          // أقصى صعوبة
         itemsCount: 20,    // أقصى صعوبة
-        targetPoints: 1000, // أقصى صعوبة
+        targetPoints: 615, // أقصى صعوبة
         rewardPoints: 600,
         rewardGems: 200,
         difficulty: 'إلهي',
@@ -7480,9 +7480,9 @@ function updateDilemmaUI() {
         
         if (success && currentUser) {
             // حساب المكافأة الإضافية حسب الأداء
-            const bonus = Math.floor((totalPoints - world.targetPoints) / 10);
+            const bonus = Math.floor((totalPoints - world.targetPoints) / 60);
             const totalRewardPoints = world.rewardPoints + totalPoints + bonus;
-            const totalRewardGems = world.rewardGems + Math.floor(totalPoints / 20);
+            const totalRewardGems = world.rewardGems + Math.floor(totalPoints / 52);
             
             currentUser.score += totalRewardPoints;
             playerWallet.gems += totalRewardGems;

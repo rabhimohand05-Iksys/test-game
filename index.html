@@ -6901,7 +6901,7 @@ const dilemmaWorlds = [
         itemsCount: 10,    // كان 6 (أكثر)
         targetPoints: 250, // كان 150 (أكثر)
         rewardPoints: 150,
-        rewardGems: 20,
+        rewardGems: 10,
         difficulty: 'صعب',
         items: [
             { emoji: '🍃', weight: 2, points: 25 },
@@ -6926,7 +6926,7 @@ const dilemmaWorlds = [
         itemsCount: 12,    // أكثر
         targetPoints: 350, // أكثر
         rewardPoints: 200,
-        rewardGems: 40,
+        rewardGems: 25,
         difficulty: 'صعب جداً',
         items: [
             { emoji: '🐺', weight: 3, points: 35 },
@@ -6953,7 +6953,7 @@ const dilemmaWorlds = [
         itemsCount: 14,    // أكثر
         targetPoints: 445, // أكثر
         rewardPoints: 300,
-        rewardGems: 60,
+        rewardGems: 40,
         difficulty: 'أسطوري',
         items: [
             { emoji: '🔥', weight: 4, points: 45 },
@@ -6978,7 +6978,7 @@ const dilemmaWorlds = [
         itemsCount: 12,    // أكثر بكثير
         targetPoints: 330, // أكثر بكثير
         rewardPoints: 450,
-        rewardGems: 100,
+        rewardGems: 70,
         difficulty: 'مستحيل',
         items: [
             { emoji: '🌹', weight: 4, points: 55 },
@@ -7004,7 +7004,7 @@ const dilemmaWorlds = [
         itemsCount: 20,    // أقصى صعوبة
         targetPoints: 615, // أقصى صعوبة
         rewardPoints: 600,
-        rewardGems: 200,
+        rewardGems: 110,
         difficulty: 'إلهي',
         items: [
             { emoji: '😼', weight: 5, points: 80 },
@@ -8543,6 +8543,148 @@ setTimeout(() => {
 }, 1500);
 
 console.log('✅ نظام الإعلانات جاهز - الزر يظهر دائماً');
+   
+    
+ // ==========================================
+// حفظ أرباح الصناديق في Firebase - الاستبدال يعمل
+// ==========================================
+
+// مصفوفة الأرباح
+let myRewards = [];
+
+// ===== تحميل الأرباح من Firebase =====
+async function loadRewards() {
+    if (!currentUser) return;
+    try {
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        if (doc.exists && doc.data().myRewards) {
+            myRewards = doc.data().myRewards;
+            console.log('✅ تم تحميل', myRewards.length, 'عنصر');
+        }
+    } catch(e) { console.error(e); }
+}
+
+// ===== حفظ الأرباح في Firebase =====
+async function saveRewards() {
+    if (!currentUser) return;
+    try {
+        await db.collection('users').doc(currentUser.uid).update({
+            myRewards: myRewards
+        });
+        console.log('✅ تم حفظ', myRewards.length, 'عنصر');
+    } catch(e) { console.error(e); }
+}
+
+// ===== إضافة ربح جديد =====
+function addReward(icon, points) {
+    const newId = Date.now() + '_' + Math.random();
+    myRewards.push({
+        id: newId,
+        icon: icon,
+        points: points,
+        expiresAt: Date.now() + (72 * 60 * 60 * 1000)
+    });
+    saveRewards();
+    console.log('✅ إضافة:', icon, points, 'مع id:', newId);
+}
+
+// ===== استبدال ربح =====
+window.exchangeReward = async function(rewardId, points) {
+    console.log('محاولة استبدال id:', rewardId);
+    
+    const reward = myRewards.find(r => r.id == rewardId);
+    if (!reward) {
+        alert('❌ العنصر غير موجود');
+        return;
+    }
+    
+    if (confirm(`🔄 استبدال ${reward.icon} مقابل ${points} نقطة؟`)) {
+        currentUser.score += points;
+        myRewards = myRewards.filter(r => r.id != rewardId);
+        await saveRewards();
+        await saveProgress();
+        updatePlayerDisplay();
+        
+        // تأثير
+        const toast = document.createElement('div');
+        toast.innerHTML = `🎉 +${points} نقطة!`;
+        toast.style.cssText = `position:fixed; top:40%; left:50%; transform:translate(-50%,-50%); background:#4CAF50; color:white; padding:12px 25px; border-radius:50px; font-size:1.2rem; z-index:30000; border:2px solid gold;`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1500);
+        
+        showLevel();
+        alert(`✅ حصلت على ${points} نقطة!`);
+    }
+};
+
+// ===== تعديل showLevel =====
+const oldShow = window.showLevel;
+window.showLevel = function() {
+    oldShow();
+    setTimeout(() => {
+        const panel = document.getElementById('basicFeaturesPanel');
+        if (!panel) return;
+        
+        const now = Date.now();
+        const active = myRewards.filter(r => r.expiresAt > now);
+        if (active.length === 0) return;
+        
+        // تجميع المكررات
+        const groups = {};
+        active.forEach(r => {
+            if (!groups[r.icon]) {
+                groups[r.icon] = { icon: r.icon, points: r.points, count: 0, ids: [] };
+            }
+            groups[r.icon].count++;
+            groups[r.icon].ids.push(r.id);
+        });
+        
+        let html = `<div style="margin-top:20px; border-top:2px solid gold; padding-top:10px;">
+            <div style="color:gold; margin-bottom:10px;">🎁 أرباح الصناديق</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">`;
+        
+        for (let g of Object.values(groups)) {
+            // نأخذ أول id من المجموعة
+            const firstId = g.ids[0];
+            html += `<div style="background:rgba(255,215,0,0.1); border-radius:10px; padding:8px; text-align:center; min-width:70px; border:1px solid gold;">
+                <div style="font-size:1.5rem;">${g.icon}</div>
+                <div style="font-size:0.7rem; color:gold;">${g.points}ن</div>
+                <div style="font-size:0.8rem; color:#ffaa00;">×${g.count}</div>
+                <button onclick="exchangeReward('${firstId}', ${g.points})" style="margin-top:5px; background:#4CAF50; border:none; border-radius:12px; padding:3px 8px; font-size:0.6rem; cursor:pointer; color:white;">
+                    🔄 استبدال
+                </button>
+            </div>`;
+        }
+        html += `</div></div>`;
+        
+        const contentDiv = panel.querySelector('div[style*="text-align: center"]');
+        if (contentDiv) contentDiv.insertAdjacentHTML('beforeend', html);
+    }, 100);
+};
+
+// ===== مراقبة فتح الصندوق =====
+let lastRewardCount = 0;
+
+setInterval(() => {
+    if (!currentUser) return;
+    
+    const items = playerWallet.ownedItems || [];
+    if (items.length > lastRewardCount) {
+        const newItem = items[items.length - 1];
+        if (newItem && newItem.icon && !newItem.savedToRewards) {
+            newItem.savedToRewards = true;
+            const points = { '🪙':30, '🎫':50, '💎':80, '👑':150, '🔮':120, '⚡':100, '🐉':250, '🌟':200, '💫':180 };
+            addReward(newItem.icon, points[newItem.icon] || 50);
+        }
+    }
+    lastRewardCount = items.length;
+}, 1000);
+
+// تحميل عند الدخول
+auth.onAuthStateChanged(async (user) => { if (user) loadRewards(); });
+
+console.log('✅ جاهز! الاستبدال يعمل الآن');                                         
+    
     </script>
       
 </body>

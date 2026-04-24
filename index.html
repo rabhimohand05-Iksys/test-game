@@ -8545,63 +8545,67 @@ setTimeout(() => {
 console.log('✅ نظام الإعلانات جاهز - الزر يظهر دائماً');
    
     
- // ==========================================
-// حفظ أرباح الصناديق في Firebase - الاستبدال يعمل
+   // ==========================================
+// حفظ وعرض أرباح الصناديق - تبقى بعد الخروج والعودة
 // ==========================================
 
-// مصفوفة الأرباح
-let myRewards = [];
-
-// ===== تحميل الأرباح من Firebase =====
-async function loadRewards() {
-    if (!currentUser) return;
-    try {
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        if (doc.exists && doc.data().myRewards) {
-            myRewards = doc.data().myRewards;
-            console.log('✅ تم تحميل', myRewards.length, 'عنصر');
-        }
-    } catch(e) { console.error(e); }
+// المتغير العام
+if (typeof window.myBoxRewards === 'undefined') {
+    window.myBoxRewards = [];
 }
 
-// ===== حفظ الأرباح في Firebase =====
-async function saveRewards() {
-    if (!currentUser) return;
-    try {
-        await db.collection('users').doc(currentUser.uid).update({
-            myRewards: myRewards
-        });
-        console.log('✅ تم حفظ', myRewards.length, 'عنصر');
-    } catch(e) { console.error(e); }
-}
-
-// ===== إضافة ربح جديد =====
-function addReward(icon, points) {
-    const newId = Date.now() + '_' + Math.random();
-    myRewards.push({
-        id: newId,
-        icon: icon,
-        points: points,
-        expiresAt: Date.now() + (72 * 60 * 60 * 1000)
-    });
-    saveRewards();
-    console.log('✅ إضافة:', icon, points, 'مع id:', newId);
-}
-
-// ===== استبدال ربح =====
-window.exchangeReward = async function(rewardId, points) {
-    console.log('محاولة استبدال id:', rewardId);
-    
-    const reward = myRewards.find(r => r.id == rewardId);
-    if (!reward) {
-        alert('❌ العنصر غير موجود');
+// تحميل من Firebase
+async function loadMyBoxRewards() {
+    if (!currentUser) {
+        console.log('❌ لا يوجد مستخدم');
         return;
     }
+    try {
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        if (doc.exists && doc.data().myBoxRewards) {
+            window.myBoxRewards = doc.data().myBoxRewards;
+            console.log('✅ تم تحميل', window.myBoxRewards.length, 'عنصر');
+        } else {
+            window.myBoxRewards = [];
+            console.log('📦 لا توجد أرباح سابقة');
+        }
+    } catch(e) { console.error('خطأ في التحميل:', e); }
+}
+
+// حفظ في Firebase
+async function saveMyBoxRewards() {
+    if (!currentUser) return;
+    try {
+        await db.collection('users').doc(currentUser.uid).set({
+            myBoxRewards: window.myBoxRewards,
+            gems: playerWallet.gems,
+            score: currentUser.score
+        }, { merge: true });
+        console.log('✅ تم حفظ', window.myBoxRewards.length, 'عنصر');
+    } catch(e) { console.error('خطأ في الحفظ:', e); }
+}
+
+// إضافة ربح جديد
+function addMyBoxReward(icon, points) {
+    window.myBoxRewards.push({
+        id: Date.now() + '_' + Math.random(),
+        icon: icon,
+        points: points,
+        obtainedAt: Date.now()
+    });
+    saveMyBoxRewards();
+    console.log('✅ تم إضافة:', icon, points);
+}
+
+// استبدال ربح
+window.exchangeMyBoxReward = async function(id, points) {
+    const reward = window.myBoxRewards.find(r => r.id == id);
+    if (!reward) { alert('❌ العنصر غير موجود'); return; }
     
     if (confirm(`🔄 استبدال ${reward.icon} مقابل ${points} نقطة؟`)) {
         currentUser.score += points;
-        myRewards = myRewards.filter(r => r.id != rewardId);
-        await saveRewards();
+        window.myBoxRewards = window.myBoxRewards.filter(r => r.id != id);
+        await saveMyBoxRewards();
         await saveProgress();
         updatePlayerDisplay();
         
@@ -8612,79 +8616,175 @@ window.exchangeReward = async function(rewardId, points) {
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 1500);
         
-        showLevel();
+        showMyBoxLevel();
         alert(`✅ حصلت على ${points} نقطة!`);
     }
 };
 
-// ===== تعديل showLevel =====
-const oldShow = window.showLevel;
-window.showLevel = function() {
-    oldShow();
-    setTimeout(() => {
-        const panel = document.getElementById('basicFeaturesPanel');
-        if (!panel) return;
-        
-        const now = Date.now();
-        const active = myRewards.filter(r => r.expiresAt > now);
-        if (active.length === 0) return;
-        
-        // تجميع المكررات
-        const groups = {};
-        active.forEach(r => {
-            if (!groups[r.icon]) {
-                groups[r.icon] = { icon: r.icon, points: r.points, count: 0, ids: [] };
-            }
-            groups[r.icon].count++;
-            groups[r.icon].ids.push(r.id);
-        });
-        
-        let html = `<div style="margin-top:20px; border-top:2px solid gold; padding-top:10px;">
-            <div style="color:gold; margin-bottom:10px;">🎁 أرباح الصناديق</div>
-            <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">`;
-        
+// عرض المستوى مع الأرباح
+function showMyBoxLevel() {
+    const nextLevelXP = (playerLevel || 1) * 100;
+    const progress = ((playerXP || 0) / nextLevelXP) * 100;
+    
+    // تجميع المكررات
+    const groups = {};
+    window.myBoxRewards.forEach(r => {
+        if (!groups[r.icon]) groups[r.icon] = { icon: r.icon, points: r.points, count: 0, ids: [] };
+        groups[r.icon].count++;
+        groups[r.icon].ids.push(r.id);
+    });
+    
+    let rewardsHtml = '';
+    const totalPoints = window.myBoxRewards.reduce((s, r) => s + r.points, 0);
+    
+    if (Object.keys(groups).length > 0) {
+        rewardsHtml = `
+            <div style="margin-top:20px; border-top:2px solid gold; padding-top:15px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:gold;">🎁 أرباح الصناديق</span>
+                    <span style="background:rgba(255,215,0,0.2); padding:2px 10px; border-radius:20px;">💰 ${totalPoints}</span>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
+        `;
         for (let g of Object.values(groups)) {
-            // نأخذ أول id من المجموعة
-            const firstId = g.ids[0];
-            html += `<div style="background:rgba(255,215,0,0.1); border-radius:10px; padding:8px; text-align:center; min-width:70px; border:1px solid gold;">
-                <div style="font-size:1.5rem;">${g.icon}</div>
-                <div style="font-size:0.7rem; color:gold;">${g.points}ن</div>
-                <div style="font-size:0.8rem; color:#ffaa00;">×${g.count}</div>
-                <button onclick="exchangeReward('${firstId}', ${g.points})" style="margin-top:5px; background:#4CAF50; border:none; border-radius:12px; padding:3px 8px; font-size:0.6rem; cursor:pointer; color:white;">
-                    🔄 استبدال
-                </button>
-            </div>`;
+            rewardsHtml += `
+                <div style="background:rgba(255,215,0,0.1); border-radius:10px; padding:8px; text-align:center; min-width:70px; border:1px solid gold;">
+                    <div style="font-size:1.5rem;">${g.icon}</div>
+                    <div style="font-size:0.7rem;">${g.points}ن</div>
+                    <div style="font-size:0.8rem; color:#ffaa00;">×${g.count}</div>
+                    <button onclick="exchangeMyBoxReward('${g.ids[0]}', ${g.points})" style="margin-top:5px; background:#4CAF50; border:none; border-radius:12px; padding:3px 8px; font-size:0.6rem; cursor:pointer; color:white;">🔄 استبدال</button>
+                </div>
+            `;
         }
-        html += `</div></div>`;
-        
-        const contentDiv = panel.querySelector('div[style*="text-align: center"]');
-        if (contentDiv) contentDiv.insertAdjacentHTML('beforeend', html);
-    }, 100);
+        rewardsHtml += `</div></div>`;
+    }
+    
+    const html = `
+        <div class="panel-header">
+            <div class="panel-title"><span>📊</span> المستوى والخبرة</div>
+            <div class="panel-close" onclick="closePanel('basicFeaturesPanel')">✕</div>
+        </div>
+        <div style="text-align:center; padding:20px;">
+            <div style="font-size:2rem;">📊</div>
+            <div style="font-size:1.5rem; color:gold;">المستوى ${playerLevel || 1}</div>
+            <div class="progress-bar" style="margin:15px 0;">
+                <div class="progress-fill" style="width:${progress}%"></div>
+            </div>
+            <div>${playerXP || 0} / ${nextLevelXP} خبرة</div>
+            ${rewardsHtml}
+        </div>
+    `;
+    
+    document.getElementById('basicFeaturesPanel').innerHTML = html;
+    document.getElementById('basicFeaturesPanel').style.display = 'block';
+}
+
+// تعديل showLevel
+window.showLevel = function() {
+    showMyBoxLevel();
 };
 
-// ===== مراقبة فتح الصندوق =====
-let lastRewardCount = 0;
-
-setInterval(() => {
-    if (!currentUser) return;
+// تعديل فتح الصندوق
+const originalBoxFunction = SecurePayment.openLootBox;
+SecurePayment.openLootBox = function(boxType) {
+    // استدعاء الدالة الأصلية أولاً
+    originalBoxFunction(boxType);
     
-    const items = playerWallet.ownedItems || [];
-    if (items.length > lastRewardCount) {
-        const newItem = items[items.length - 1];
-        if (newItem && newItem.icon && !newItem.savedToRewards) {
-            newItem.savedToRewards = true;
+    // بعدها نضيف آخر عنصر تم ربحه
+    setTimeout(() => {
+        const lastItem = playerWallet.ownedItems[playerWallet.ownedItems.length - 1];
+        if (lastItem && lastItem.icon && !lastItem.savedToRewards) {
+            lastItem.savedToRewards = true;
             const points = { '🪙':30, '🎫':50, '💎':80, '👑':150, '🔮':120, '⚡':100, '🐉':250, '🌟':200, '💫':180 };
-            addReward(newItem.icon, points[newItem.icon] || 50);
+            addMyBoxReward(lastItem.icon, points[lastItem.icon] || 50);
+            console.log('✅ تم إضافة:', lastItem.icon);
         }
+    }, 500);
+};
+
+// ★★★最重要的是 هذا الجزء - التحميل عند تسجيل الدخول ★★★
+const originalAuthChanged = auth.onAuthStateChanged;
+auth.onAuthStateChanged = async (user) => {
+    if (user) {
+        currentUser = user;
+        await loadMyBoxRewards();
+        console.log('📦 الأرباح بعد التحميل:', window.myBoxRewards.length);
+        
+        // إذا كانت صفحة المستوى مفتوحة، حدثها
+        setTimeout(() => {
+            if (document.getElementById('basicFeaturesPanel').style.display === 'block') {
+                showMyBoxLevel();
+            }
+        }, 500);
     }
-    lastRewardCount = items.length;
-}, 1000);
+    if (originalAuthChanged) originalAuthChanged(user);
+};
 
-// تحميل عند الدخول
-auth.onAuthStateChanged(async (user) => { if (user) loadRewards(); });
+console.log('✅ النظام جاهز! الأرباح تظهر بعد الخروج والعودة'); 
+   
+   
+  // ==========================================
+// الإصلاح النهائي لظهور الأرباح بعد العودة
+// ==========================================
 
-console.log('✅ جاهز! الاستبدال يعمل الآن');                                         
-    
+// التأكد من تحميل الأرباح قبل عرض المستوى
+const originalShowMyBoxLevel = window.showMyBoxLevel;
+window.showMyBoxLevel = function() {
+    // إذا كانت الأرباح فارغة، حاول التحميل مرة أخرى
+    if ((!window.myBoxRewards || window.myBoxRewards.length === 0) && currentUser) {
+        console.log('🔄 محاولة تحميل الأرباح قبل العرض...');
+        loadMyBoxRewards().then(() => {
+            originalShowMyBoxLevel();
+        });
+        return;
+    }
+    originalShowMyBoxLevel();
+};
+
+// تعديل دالة loadMyBoxRewards لتعرض المستوى تلقائياً بعد التحميل
+const originalLoadMyBoxRewards = window.loadMyBoxRewards;
+window.loadMyBoxRewards = async function() {
+    if (!currentUser) return;
+    try {
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        if (doc.exists && doc.data().myBoxRewards) {
+            window.myBoxRewards = doc.data().myBoxRewards;
+            console.log('✅ تم تحميل', window.myBoxRewards.length, 'عنصر');
+        } else {
+            window.myBoxRewards = [];
+        }
+        
+        // 🔥 الأهم: إذا كانت لوحة المستوى مفتوحة، قم بتحديثها فوراً
+        const panel = document.getElementById('basicFeaturesPanel');
+        if (panel && panel.style.display === 'block') {
+            console.log('🔄 تحديث لوحة المستوى بعد التحميل');
+            if (typeof showMyBoxLevel === 'function') showMyBoxLevel();
+        }
+    } catch(e) { console.error(e); }
+};
+
+// تأكيد أن دالة showLevel تشير إلى showMyBoxLevel
+window.showLevel = function() {
+    if (typeof showMyBoxLevel === 'function') {
+        showMyBoxLevel();
+    }
+};
+
+// حل إضافي: مراقبة فتح لوحة المستوى وإعادة التحميل
+const originalShowBasicFeatures = window.showBasicFeatures;
+window.showBasicFeatures = function() {
+    originalShowBasicFeatures();
+    // كلما فتحت القائمة الأساسية، تحقق من تحميل الأرباح
+    setTimeout(() => {
+        if (window.myBoxRewards && window.myBoxRewards.length > 0) {
+            if (typeof showMyBoxLevel === 'function') showMyBoxLevel();
+        }
+    }, 200);
+};
+
+console.log('✅ تم تفعيل الإصلاح - الأرباح ستظهر بعد العودة'); 
+   
+
     </script>
       
 </body>

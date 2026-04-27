@@ -4628,75 +4628,125 @@ function showAchievements() {
     const failedGames = playerStats.failedGames || 0;
     const winRate = totalGames > 0 ? Math.round((successfulGames / totalGames) * 100) : 0;
     
+    // ===== إحصائيات المناطق المفتوحة (العالم المفتوح) =====
+    let completedOpenRegions = 0;
+    if (currentUser) {
+        const wonKey = `won_regions_${currentUser.uid}`;
+        const saved = localStorage.getItem(wonKey);
+        if (saved) {
+            completedOpenRegions = JSON.parse(saved).length;
+        }
+    }
+    
+    const openRegions = [
+        { name: 'الصحراء', icon: '🏜️' },
+        { name: 'الجليد', icon: '❄️' },
+        { name: 'البركان', icon: '🌋' },
+        { name: 'السماء', icon: '☁️' },
+        { name: 'الأعماق', icon: '🌊' },
+        { name: 'السحر', icon: '🔮' }
+    ];
+    
+    // ===== إحصائيات Dilemma Mode =====
+    let dilemmaLevel = 1;
+    if (currentUser) {
+        const saved = localStorage.getItem(`dilemma_level_${currentUser.uid}`);
+        if (saved) dilemmaLevel = parseInt(saved);
+    }
+    
+    // حساب التقدم
+    const worldsProgress = [gameProgress.world1, gameProgress.world2, gameProgress.world3, gameProgress.world4, gameProgress.world5, gameProgress.world6].filter(Boolean).length;
+    const worldsPercent = (worldsProgress / 6) * 100;
+    const openPercent = (completedOpenRegions / 6) * 100;
+    const dilemmaPercent = Math.min((dilemmaLevel / 50) * 100, 100);
+    
     const html = `
-        <div class="panel-header">
-            <div class="panel-title"><span>📈</span> الإحصائيات المتقدمة</div>
-            <div class="panel-close" onclick="closePanel('basicFeaturesPanel')">✕</div>
-        </div>
-        
-        <div class="stats-detailed">
-            <div class="stat-category">
-                <h3>📊 إحصائيات اللعب</h3>
-                <div class="stat-row">
-                    <span>إجمالي الجولات:</span>
-                    <span class="stat-value">${totalGames}</span>
+        <div style="display: flex; flex-direction: column; height: 100%;">
+            <!-- header بدون sticky -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid gold;">
+                <div style="font-size: 1.5rem; color: gold; display: flex; align-items: center; gap: 10px;">
+                    <span>📈</span> الإحصائيات المتقدمة
                 </div>
-                <div class="stat-row">
-                    <span>الجولات الناجحة:</span>
-                    <span class="stat-value">${successfulGames}</span>
-                </div>
-                <div class="stat-row">
-                    <span>الجولات الفاشلة:</span>
-                    <span class="stat-value">${failedGames}</span>
-                </div>
-                <div class="stat-row">
-                    <span>نسبة النجاح:</span>
-                    <span class="stat-value">${winRate}%</span>
-                </div>
-                <div class="stat-row">
-                    <span>العناصر المجمعة:</span>
-                    <span class="stat-value">${playerStats.totalItemsCollected || 0}</span>
-                </div>
+                <div onclick="closePanel('basicFeaturesPanel')" style="width: 35px; height: 35px; background: rgba(255,255,255,0.1); border: 2px solid gold; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer;">✕</div>
             </div>
             
-            <div class="stat-category">
-                <h3>💰 الإحصائيات المالية</h3>
-                <div class="stat-row">
-                    <span>الجواهر:</span>
-                    <span class="stat-value">${playerWallet.gems} 💎</span>
+            <!-- محتوى قابل للتمرير -->
+            <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
+                
+                <!-- ===== إحصائيات اللعب ===== -->
+                <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; margin-bottom: 15px; border: 1px solid rgba(255,215,0,0.3);">
+                    <h3 style="color: gold; margin-bottom: 10px; font-size: 1rem;">📊 إحصائيات اللعب</h3>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,215,0,0.2);">
+                        <span>إجمالي الجولات:</span>
+                        <span style="color: gold;">${totalGames}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,215,0,0.2);">
+                        <span>الجولات الناجحة:</span>
+                        <span style="color: #4CAF50;">${successfulGames}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,215,0,0.2);">
+                        <span>الجولات الفاشلة:</span>
+                        <span style="color: #ff4444;">${failedGames}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,215,0,0.2);">
+                        <span>نسبة النجاح:</span>
+                        <span style="color: ${winRate >= 50 ? '#4CAF50' : '#ff9800'};">${winRate}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                        <span>العناصر المجمعة:</span>
+                        <span style="color: gold;">${playerStats.totalItemsCollected || 0}</span>
+                    </div>
                 </div>
-                <div class="stat-row">
-                    <span>النقاط:</span>
-                    <span class="stat-value">${currentUser?.score || 0}</span>
+                
+                <!-- ===== الإحصائيات المالية ===== -->
+                <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; margin-bottom: 15px; border: 1px solid rgba(255,215,0,0.3);">
+                    <h3 style="color: gold; margin-bottom: 10px; font-size: 1rem;">💰 الإحصائيات المالية</h3>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,215,0,0.2);">
+                        <span>الجواهر:</span>
+                        <span style="color: #9b59b6;">${playerWallet.gems} 💎</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                        <span>النقاط:</span>
+                        <span style="color: gold;">${currentUser?.score || 0}</span>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="stat-category">
-                <h3>🏆 تقدم العوالم</h3>
-                <div class="stat-row">
-                    <span>عالم البحر:</span>
-                    <span class="stat-value">${gameProgress.world1 ? '✅' : '❌'}</span>
+                
+                <!-- ===== تقدم العوالم ===== -->
+                <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; margin-bottom: 15px; border: 1px solid rgba(255,215,0,0.3);">
+                    <h3 style="color: gold; margin-bottom: 10px; font-size: 1rem;">🏆 تقدم العوالم</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 10px;">
+                        <div style="text-align: center;"><div style="font-size: 1.3rem;">🌊</div><div style="font-size: 0.6rem;">البحر</div><div style="color: ${gameProgress.world1 ? '#4CAF50' : '#ff4444'};">${gameProgress.world1 ? '✅' : '❌'}</div></div>
+                        <div style="text-align: center;"><div style="font-size: 1.3rem;">🌙</div><div style="font-size: 0.6rem;">الليل</div><div style="color: ${gameProgress.world2 ? '#4CAF50' : '#ff4444'};">${gameProgress.world2 ? '✅' : '❌'}</div></div>
+                        <div style="text-align: center;"><div style="font-size: 1.3rem;">🌳</div><div style="font-size: 0.6rem;">الغابة</div><div style="color: ${gameProgress.world3 ? '#4CAF50' : '#ff4444'};">${gameProgress.world3 ? '✅' : '❌'}</div></div>
+                        <div style="text-align: center;"><div style="font-size: 1.3rem;">🚀</div><div style="font-size: 0.6rem;">الفضاء</div><div style="color: ${gameProgress.world4 ? '#4CAF50' : '#ff4444'};">${gameProgress.world4 ? '✅' : '❌'}</div></div>
+                        <div style="text-align: center;"><div style="font-size: 1.3rem;">❤️</div><div style="font-size: 0.6rem;">الحب</div><div style="color: ${gameProgress.world5 ? '#4CAF50' : '#ff4444'};">${gameProgress.world5 ? '✅' : '❌'}</div></div>
+                        <div style="text-align: center;"><div style="font-size: 1.3rem;">⚔️</div><div style="font-size: 0.6rem;">التحديات</div><div style="color: ${gameProgress.world6 ? '#4CAF50' : '#ff4444'};">${gameProgress.world6 ? '✅' : '❌'}</div></div>
+                    </div>
+                    <div class="progress-bar" style="height: 15px;"><div class="progress-fill" style="width: ${worldsPercent}%;"></div></div>
+                    <div style="text-align: center; margin-top: 5px;">${worldsProgress}/6 عوالم</div>
                 </div>
-                <div class="stat-row">
-                    <span>عالم الليل:</span>
-                    <span class="stat-value">${gameProgress.world2 ? '✅' : '❌'}</span>
+                
+                <!-- ===== العالم المفتوح ===== -->
+                <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; margin-bottom: 15px; border: 1px solid rgba(255,215,0,0.3);">
+                    <h3 style="color: gold; margin-bottom: 10px; font-size: 1rem;">🗺️ العالم المفتوح</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 10px;">
+                        ${openRegions.map(region => `<div style="text-align: center;"><div style="font-size: 1.3rem;">${region.icon}</div><div style="font-size: 0.55rem;">${region.name}</div></div>`).join('')}
+                    </div>
+                    <div class="progress-bar" style="height: 15px;"><div class="progress-fill" style="width: ${openPercent}%; background: linear-gradient(90deg, #ff9800, #ff5722);"></div></div>
+                    <div style="text-align: center; margin-top: 5px;">${completedOpenRegions}/6 مناطق</div>
                 </div>
-                <div class="stat-row">
-                    <span>عالم الغابة:</span>
-                    <span class="stat-value">${gameProgress.world3 ? '✅' : '❌'}</span>
+                
+                <!-- ===== Dilemma Mode ===== -->
+                <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; margin-bottom: 15px; border: 1px solid rgba(255,215,0,0.3);">
+                    <h3 style="color: gold; margin-bottom: 10px; font-size: 1rem;">⚖️ Dilemma Mode</h3>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>المستوى الحالي:</span>
+                        <span style="color: #f5576c; font-size: 1.3rem;">${dilemmaLevel}</span>
+                    </div>
+                    <div class="progress-bar" style="height: 15px;"><div class="progress-fill" style="width: ${dilemmaPercent}%; background: linear-gradient(90deg, #f093fb, #f5576c);"></div></div>
+                    <div style="text-align: center; margin-top: 5px;">${Math.floor(dilemmaPercent)}% نحو المستوى 50</div>
                 </div>
-                <div class="stat-row">
-                    <span>عالم الفضاء:</span>
-                    <span class="stat-value">${gameProgress.world4 ? '✅' : '❌'}</span>
-                </div>
-                <div class="stat-row">
-                    <span>عالم الحب:</span>
-                    <span class="stat-value">${gameProgress.world5 ? '✅' : '❌'}</span>
-                </div>
-                <div class="stat-row">
-                    <span>عالم التحديات:</span>
-                    <span class="stat-value">${gameProgress.world6 ? '✅' : '❌'}</span>
-                </div>
+                
             </div>
         </div>
     `;
@@ -4704,17 +4754,7 @@ function showAchievements() {
     const panel = document.getElementById('basicFeaturesPanel');
     panel.innerHTML = html;
     panel.style.display = 'block';
-}
-        // ===== دالة لعرض الإحصائيات في Console =====
-function showStatsInConsole() {
-    console.log('📊 الإحصائيات الحالية:');
-    console.log('إجمالي الجولات:', playerStats.totalGames);
-    console.log('الجولات الناجحة:', playerStats.successfulGames);
-    console.log('الجولات الفاشلة:', playerStats.failedGames);
-    console.log('العناصر المجمعة:', playerStats.totalItemsCollected);
-    console.log('الجواهر:', playerWallet.gems);
-    console.log('النقاط:', currentUser?.score);
-}
+        }
         function showQuests() {
             closeAllPanels();
             

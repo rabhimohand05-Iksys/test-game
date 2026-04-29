@@ -7088,13 +7088,34 @@ function getDilemmaWorld(level) {
     // زيادة الصعوبة بشكل أسرع
     const multiplier = 1 + (level - 1) * 0.4;
     
-    const capacity = Math.max(Math.floor(baseCapacity - (level - 1) * 0.2), 4);
-    const time = Math.max(Math.floor(baseTime - (level - 1) * 0.5), 25);
-    const itemsCount = Math.min(baseItems + Math.floor((level - 1) / 2), 11);
-    const targetPoints = Math.floor(capacity*31.6+ level*6);
-    const rewardPoints = Math.floor(120 + (level - 1) * 15);
-    const rewardGems = Math.floor(25 + (level - 1) * 6);
-    
+    let capacity = Math.max(Math.floor(baseCapacity - (level - 1) * 0.2), 4);
+let time = Math.max(Math.floor(baseTime - (level - 1) * 0.5), 25);
+let itemsCount = Math.min(baseItems + Math.floor((level - 1) / 2), 11);
+let targetPoints = Math.floor(capacity * 23.6 + level * 6);
+let rewardPoints = Math.floor(120 + (level - 1) * 15);
+let rewardGems = Math.floor(25 + (level - 1) * 6);
+
+// ===== تعديلات خاصة للمستويات 6 و 7 و 8 و 9 =====
+if (level === 6) {
+    capacity = 10;
+    targetPoints = 250;
+}
+if (level === 7) {
+    capacity = 10;
+    targetPoints = 200;
+}
+if (level === 8) {
+    capacity = 11;
+    targetPoints = 250;
+}
+if (level === 9) {
+    capacity = 10;
+    targetPoints = 280;
+}
+if (level === 10) {
+    capacity = 18;
+    targetPoints = 280;
+    }
     // إنشاء عناصر عشوائية بأوزان ثقيلة
     const allEmojis = ['⚔️', '🛡️', '🏹', '🔮', '💎', '👑', '🌟', '⭐', '✨', '💫', '🔥', '🌊', '🌪️', '❄️', '⚡', '☠️', '🐉', '🦅', '🐺', '🦁', '💀', '👻', '🌋', '🌑'];
     const items = [];

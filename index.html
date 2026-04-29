@@ -7080,18 +7080,18 @@ function getDilemmaWorld(level) {
     const difficultyIndex = Math.min(Math.floor(level / 4), difficultyNames.length - 1);
     
     // حساب الإحصائيات بناءً على المستوى (صيغة أقسى)
-    const baseCapacity = 8;
+    const baseCapacity = 18;
     const baseTime = 45;
     const baseItems = 12;
     const baseTarget = 300;
     
     // زيادة الصعوبة بشكل أسرع
-    const multiplier = 1 + (level - 1) * 0.12;
+    const multiplier = 1 + (level - 1) * 0.4;
     
-    const capacity = Math.max(Math.floor(baseCapacity - (level - 1) * 0.4), 24);
+    const capacity = Math.max(Math.floor(baseCapacity - (level - 1) * 0.2), 4);
     const time = Math.max(Math.floor(baseTime - (level - 1) * 0.5), 25);
     const itemsCount = Math.min(baseItems + Math.floor((level - 1) / 2), 11);
-    const targetPoints = Math.floor(baseTarget * multiplier);
+    const targetPoints = Math.floor(capacity*31.6+ level*6);
     const rewardPoints = Math.floor(120 + (level - 1) * 15);
     const rewardGems = Math.floor(25 + (level - 1) * 6);
     
@@ -7100,17 +7100,28 @@ function getDilemmaWorld(level) {
     const items = [];
     
     for (let i = 0; i < itemsCount; i++) {
-        // أوزان ثقيلة (2-6)
-        const weight = Math.min(Math.floor(2 + Math.random() * 5), 6);
-        // نقاط عالية ولكن نسبة النقاط/الوزن أقل
-        const points = Math.floor(28 + (level - 1) * 4 + Math.random() * 40);
-        items.push({
-            emoji: allEmojis[i % allEmojis.length],
-            weight: weight,
-            points: points
-        });
+    const weight = Math.min(Math.floor(2 + Math.random() * 5), 7);
+    
+    // النقاط الأساسية
+    let points = Math.floor(25 + (level - 1) * 2.2 + Math.random() * 30);
+    
+    // 20% عناصر شاذة
+    if (Math.random() < 0.2) {
+        if (Math.random() > 0.5) {
+            points = Math.floor(points * 0.3);  // أقل بكثير
+        } else {
+            points = Math.floor(points * 1.8);  // أكثر بكثير
+        }
     }
     
+    points = Math.min(Math.max(points, 10), 200);
+    
+    items.push({
+        emoji: allEmojis[i % allEmojis.length],
+        weight: weight,
+        points: points
+    });
+                       }
     return {
         id: level,
         name: `العالم ${level}`,

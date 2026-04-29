@@ -2702,19 +2702,6 @@ completeRegion: function(isCompleted) {
             // ❌ إزالة قفل المنطقة - نريد أن تبقى مفتوحة للعب مرة أخرى
             // لا نقفل المنطقة!
             
-            // فتح المنطقة التالية (مرة واحدة فقط)
-            const currentIndex = this.regions.findIndex(r => r.id === this.currentRegionId);
-            if (currentIndex !== -1 && currentIndex + 1 < this.regions.length) {
-                const nextRegion = this.regions[currentIndex + 1];
-                if (nextRegion.locked && !nextRegion.vip) {
-                    nextRegion.locked = false;
-                    if (!playerWallet.unlockedRegions.includes(nextRegion.id)) {
-                        playerWallet.unlockedRegions.push(nextRegion.id);
-                    }
-                    saveOpenWorldRegions();
-                    console.log(`🎉 تم فتح المنطقة التالية: ${nextRegion.name}`);
-                }
-            }
             
             saveProgress();
             updatePlayerDisplay();
@@ -6264,15 +6251,6 @@ OpenWorld.completeRegion = function(isCompleted) {
             
         }
         
-        // فتح المنطقة التالية فقط إذا لم تكن مفتوحة من قبل
-        const currentIndex = this.regions.findIndex(r => r.id === this.currentRegionId);
-        if (currentIndex !== -1 && currentIndex + 1 < this.regions.length) {
-            const nextRegion = this.regions[currentIndex + 1];
-            if (nextRegion.locked && !nextRegion.vip) {
-                nextRegion.locked = false;
-                console.log(`🎉 تم فتح المنطقة التالية: ${nextRegion.name}`);
-            }
-        }
         
         saveProgress();
         updatePlayerDisplay();

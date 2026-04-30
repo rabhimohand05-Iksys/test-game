@@ -7558,8 +7558,8 @@ function updateDilemmaUI() {
         if (success && currentUser) {
             // حساب المكافأة الإضافية حسب الأداء
             const bonus = Math.floor((totalPoints - world.targetPoints) / 60);
-            const totalRewardPoints = Math.floor((world.rewardPoints + totalPoints + bonus) * 0.5);
-            const totalRewardGems = Math.floor((world.rewardGems + Math.floor(totalPoints / 30)) * 0.5);
+            const totalRewardPoints = Math.floor((world.rewardPoints + totalPoints + bonus) * 0.8);
+            const totalRewardGems = Math.floor((world.rewardGems + Math.floor(totalPoints / 30)) * 0.7);
             currentUser.score += totalRewardPoints;
             playerWallet.gems += totalRewardGems;
             

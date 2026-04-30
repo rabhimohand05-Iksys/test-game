@@ -3498,37 +3498,60 @@ if (!document.querySelector('#openWorldStyles')) {
 }
 
         function showElegantResult(world, points, maxPoints, percentage, success) {
-            const worldNames = {
-                beach: 'عالم البحر', night: 'عالم الليل', forest: 'عالم الغابة',
-                space: 'عالم الفضاء', love: 'عالم الحب', challenge: 'عالم التحديات',
-                openworld: 'العالم المفتوح'
-            };
-            
-            const resultBox = document.getElementById('resultBox');
-            resultBox.innerHTML = `
-                <div class="result-icon">${success ? '🏆' : '💪'}</div>
-                <div class="result-title">${success ? 'تهانينا!' : 'محاولة رائعة!'}</div>
-                <div class="result-points">${points} نقطة</div>
-                ${playerWallet.gems > 0 ? `<div class="result-points" style="font-size: 1.5rem;">+ ${Math.floor(points/20)} 💎</div>` : ''}
-                <div class="result-stats">
-                    <div class="result-stat">
-                        <div class="result-stat-value">${percentage}%</div>
-                        <div class="result-stat-label">نسبة النجاح</div>
-                    </div>
-                    <div class="result-stat">
-                        <div class="result-stat-value">${maxPoints}</div>
-                        <div class="result-stat-label">الحد الأقصى</div>
-                    </div>
+    const worldNames = {
+        beach: 'عالم البحر', night: 'عالم الليل', forest: 'عالم الغابة',
+        space: 'عالم الفضاء', love: 'عالم الحب', challenge: 'عالم التحديات',
+        openworld: 'العالم المفتوح'
+    };
+    
+    const resultBox = document.getElementById('resultBox');
+    
+    if (success) {
+        // ✅ فوز: زر "متابعة" فقط
+        resultBox.innerHTML = `
+            <div class="result-icon">🏆</div>
+            <div class="result-title">تهانينا!</div>
+            <div class="result-points">${points} نقطة</div>
+            ${playerWallet.gems > 0 ? `<div class="result-points" style="font-size: 1.5rem;">+ ${Math.floor(points/20)} 💎</div>` : ''}
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="result-stat-value">${percentage}%</div>
+                    <div class="result-stat-label">نسبة النجاح</div>
                 </div>
-                <div class="result-buttons">
-                    <button class="result-btn result-btn-primary" onclick="closeResultAndContinue()">متابعة</button>
-                    <button class="result-btn result-btn-secondary" onclick="closeResultAndRestart('${world}')">إعادة</button>
+                <div class="result-stat">
+                    <div class="result-stat-value">${maxPoints}</div>
+                    <div class="result-stat-label">الحد الأقصى</div>
                 </div>
-            `;
-            
-            document.getElementById('resultScreen').style.display = 'flex';
+            </div>
+            <div class="result-buttons">
+                <button class="result-btn result-btn-primary" onclick="closeResultAndContinue()">متابعة</button>
+            </div>
+        `;
+    } else {
+        // ✅ خسارة: الزرين (متابعة + إعادة) كما كان من قبل
+        resultBox.innerHTML = `
+            <div class="result-icon">💪</div>
+            <div class="result-title">محاولة رائعة!</div>
+            <div class="result-points">${points} نقطة</div>
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="result-stat-value">${percentage}%</div>
+                    <div class="result-stat-label">نسبة النجاح</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-value">${maxPoints}</div>
+                    <div class="result-stat-label">الحد الأقصى</div>
+                </div>
+            </div>
+            <div class="result-buttons">
+                <button class="result-btn result-btn-primary" onclick="closeResultAndContinue()">متابعة</button>
+                <button class="result-btn result-btn-secondary" onclick="closeResultAndRestart('${world}')">إعادة</button>
+            </div>
+        `;
+    }
+    
+    document.getElementById('resultScreen').style.display = 'flex';
         }
-
         function closeResultAndContinue() {
     document.getElementById('resultScreen').style.display = 'none';
     

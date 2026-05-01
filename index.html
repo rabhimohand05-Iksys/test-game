@@ -1441,6 +1441,25 @@
 .stat-value {
     font-size: 0.8rem;
 }
+
+
+#worldTimer {
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    right: auto !important;
+    transform: none !important;
+    background: #4CAF50 !important;
+    color: white !important;
+    padding: 8px 20px !important;
+    border-radius: 50px !important;
+    font-weight: bold !important;
+    z-index: 9999 !important;
+    border: 2px solid gold !important;
+    font-size: 1rem !important;
+    direction: ltr !important;
+        }        
+        
     </style>
 </head>
 <body>
@@ -2218,11 +2237,11 @@ const OpenWorld = {
 
     // تكوين كل منطقة
     regionConfig: {
-        desert: { threshold: 50, capacity: 18, time: 60, itemsCount: 8, name: 'الصحراء', rewardPoints: 150, rewardGems: 30 },
+        desert: { threshold: 72, capacity: 12, time: 60, itemsCount: 8, name: 'الصحراء', rewardPoints: 150, rewardGems: 30 },
         ice: { threshold: 55, capacity: 11, time: 65, itemsCount: 8, name: 'الجليد', rewardPoints: 180, rewardGems: 35 },
         volcano: { threshold: 60, capacity: 16, time: 70, itemsCount: 8, name: 'البركان', rewardPoints: 200, rewardGems: 40 },
         sky: { threshold: 65, capacity: 14, time: 55, itemsCount: 8, name: 'السماء', rewardPoints: 220, rewardGems: 45 },
-        underwater: { threshold: 70, capacity: 20, time: 80, itemsCount: 10, name: 'الأعماق', rewardPoints: 250, rewardGems: 50 },
+        underwater: { threshold: 64, capacity: 10, time: 80, itemsCount: 10, name: 'الأعماق', rewardPoints: 250, rewardGems: 50 },
         magic: { threshold: 75, capacity: 24, time: 90, itemsCount: 12, name: 'السحر', rewardPoints: 300, rewardGems: 60 }
     },
 

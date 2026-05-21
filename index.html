@@ -5650,48 +5650,102 @@ function showRequestsTab() {
 }
 
 // ===== البحث عن صديق وإضافته =====
+// ===== إضافة صديق بالبريد الإلكتروني أو UID =====
 async function searchAndAddFriend() {
     const input = document.getElementById('friendSearchInput');
-    const username = input.value.trim();
+    const searchValue = input?.value.trim();
     
-    if (!username) return;
+    if (!searchValue) {
+        alert('❌ أدخل البريد الإلكتروني للصديق');
+        return;
+    }
+    
+    // إظهار رسالة انتظار
+    const searchBtn = document.querySelector('#challengesContent button:last-child');
+    const originalText = searchBtn?.innerText;
+    if (searchBtn) searchBtn.innerText = '⏳ جاري البحث...';
     
     try {
-        const snapshot = await db.collection('users')
-            .where('name', '==', username)
-            .limit(1)
-            .get();
+        let targetUser = null;
+        let targetId = null;
+        let targetName = null;
         
-        if (snapshot.empty) {
-            alert('❌ لا يوجد مستخدم بهذا الاسم');
+        // حالة 1: البحث بالبريد الإلكتروني (الأفضل)
+        if (searchValue.includes('@')) {
+            const snapshot = await db.collection('users')
+                .where('email', '==', searchValue)
+                .limit(1)
+                .get();
+            
+            if (!snapshot.empty) {
+                targetUser = snapshot.docs[0];
+                targetId = targetUser.id;
+                targetName = targetUser.data().name;
+            }
+        }
+        
+        // حالة 2: البحث بالمعرف (UID)
+        if (!targetUser) {
+            const doc = await db.collection('users').doc(searchValue).get();
+            if (doc.exists) {
+                targetUser = doc;
+                targetId = searchValue;
+                targetName = doc.data().name;
+            }
+        }
+        
+        if (!targetUser) {
+            alert(`❌ لم يتم العثور على مستخدم\n\n💡 يمكنك البحث بـ:\n• البريد الإلكتروني (example@mail.com)\n• معرف المستخدم (UID)`);
+            if (searchBtn) searchBtn.innerText = originalText || '➕ إضافة صديق';
             return;
         }
         
-        const userDoc = snapshot.docs[0];
-        const userId = userDoc.id;
+        // منع إضافة النفس
+        if (targetId === currentUser.uid) {
+            alert('❌ لا يمكنك إضافة نفسك كصديق');
+            if (searchBtn) searchBtn.innerText = originalText || '➕ إضافة صديق';
+            return;
+        }
         
-        if (userId === currentUser.uid) {
-            alert('❌ لا يمكنك إضافة نفسك');
+        // التحقق: هل هو صديق بالفعل؟
+        const socialDoc = await db.collection('social').doc(currentUser.uid).get();
+        const existingFriends = socialDoc.data()?.friends || [];
+        const isAlreadyFriend = existingFriends.some(f => f.id === targetId);
+        
+        if (isAlreadyFriend) {
+            alert(`✅ ${targetName} هو بالفعل صديقك!`);
+            if (searchBtn) searchBtn.innerText = originalText || '➕ إضافة صديق';
             return;
         }
         
         // إرسال طلب صداقة
-        await db.collection('social').doc(userId).update({
+        await db.collection('social').doc(targetId).set({
             requests: firebase.firestore.FieldValue.arrayUnion({
                 fromId: currentUser.uid,
                 fromName: currentUser.displayName,
-                timestamp: new Date()
+                fromEmail: currentUser.email,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
             })
-        });
+        }, { merge: true });
         
-        alert(`✅ تم إرسال طلب صداقة إلى ${username}`);
-        input.value = '';
+        alert(`✅ تم إرسال طلب صداقة إلى ${targetName}\n✉️ البريد: ${searchValue.includes('@') ? searchValue : targetUser?.data()?.email || 'غير متوفر'}`);
+        
+        // تفريغ الحقل
+        if (input) input.value = '';
+        
+        // تحديث الواجهة
+        setTimeout(() => {
+            loadFriendsData();
+            showRequestsTab();
+        }, 1000);
         
     } catch (error) {
-        console.error('خطأ:', error);
-        alert('❌ فشل إرسال الطلب');
+        console.error('❌ خطأ:', error);
+        alert('❌ حدث خطأ. تأكد من اتصال الإنترنت وحاول مرة أخرى');
     }
-}
+    
+    if (searchBtn) searchBtn.innerText = originalText || '➕ إضافة صديق';
+        }
 
 // ===== قبول طلب صداقة =====
 async function acceptFriendRequest(friendId, friendName) {
@@ -8924,6 +8978,77 @@ window.showBasicFeatures = function() {
 console.log('✅ تم تفعيل الإصلاح - الأرباح ستظهر بعد العودة'); 
    
 
+// ===== إضافة زر نسخ معرف المستخدم =====
+
+// عرض UID في لوحة الإحصائيات
+const originalShowStatistics = window.showStatistics;
+window.showStatistics = function() {
+    if (originalShowStatistics) originalShowStatistics();
+    
+    setTimeout(() => {
+        const panel = document.getElementById('basicFeaturesPanel');
+        if (panel && panel.querySelector('.stat-category:first-child')) {
+            // التحقق إذا كان الزر مضافاً بالفعل
+            if (panel.querySelector('.copy-uid-btn')) return;
+            
+            const uidDiv = document.createElement('div');
+            uidDiv.className = 'stat-row';
+            uidDiv.style.background = 'rgba(255,215,0,0.15)';
+            uidDiv.style.marginTop = '15px';
+            uidDiv.style.padding = '10px';
+            uidDiv.style.borderRadius = '12px';
+            uidDiv.style.border = '1px solid gold';
+            uidDiv.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">🆔</span>
+                        <span style="font-size: 0.8rem;">معرفك (لإضافة الأصدقاء):</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <code style="background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 8px; font-size: 0.7rem; direction: ltr;">
+                            ${currentUser?.uid.substring(0, 12)}...
+                        </code>
+                        <button class="copy-uid-btn" onclick="copyMyUID()" style="
+                            background: linear-gradient(135deg, gold, orange);
+                            border: none;
+                            border-radius: 20px;
+                            padding: 5px 12px;
+                            cursor: pointer;
+                            font-size: 0.7rem;
+                            font-weight: bold;
+                        ">📋 نسخ</button>
+                    </div>
+                </div>
+                <div style="font-size: 0.6rem; color: #aaa; margin-top: 8px; text-align: center;">
+                    💡 شارك هذا المعرف مع أصدقائك ليضيفوك
+                </div>
+            `;
+            panel.querySelector('.stat-category:first-child').appendChild(uidDiv);
+        }
+    }, 100);
+};
+
+// دالة نسخ UID
+window.copyMyUID = function() {
+    if (currentUser?.uid) {
+        navigator.clipboard.writeText(currentUser.uid);
+        
+        // تأثير مؤقت
+        const btn = document.querySelector('.copy-uid-btn');
+        const originalText = btn?.innerHTML;
+        if (btn) {
+            btn.innerHTML = '✅ تم النسخ!';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 1500);
+        }
+        
+        alert('✅ تم نسخ معرفك!\n📋 أرسله لصديقك ليضيفك');
+    }
+};
+
+console.log('✅ تم إضافة زر نسخ UID في لوحة الإحصائيات');
+    
     </script>
       
 </body>

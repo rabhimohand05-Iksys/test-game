@@ -5708,12 +5708,12 @@ async function searchAndAddFriend() {
         }
         
         await db.collection('social').doc(targetId).set({
-            requests: firebase.firestore.FieldValue.arrayUnion({
-                fromId: currentUser.uid,
-                fromName: currentUser.displayName,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-        }, { merge: true });
+    requests: firebase.firestore.FieldValue.arrayUnion({
+        fromId: currentUser.uid,
+        fromName: currentUser.displayName,
+        timestamp: new Date()  // ← هذا هو التعديل
+    })
+}, { merge: true });
         
         alert(`✅ تم إرسال طلب صداقة إلى ${targetName}`);
         input.value = '';

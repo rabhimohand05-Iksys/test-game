@@ -5650,60 +5650,57 @@ function showRequestsTab() {
 }
 
 // ===== البحث عن صديق وإضافته =====
-// ===== إضافة صديق بالبريد الإلكتروني أو UID =====
 async function searchAndAddFriend() {
     const input = document.getElementById('friendSearchInput');
-    const searchValue = input?.value.trim();
+    if (!input) {
+        console.error('❌ حقل البحث غير موجود');
+        return;
+    }
     
-    if (!searchValue) {
+    const email = input.value.trim();
+    
+    if (!email) {
         alert('❌ أدخل البريد الإلكتروني للصديق');
         return;
     }
     
-    // إظهار رسالة انتظار
+    // تعطيل الزر مؤقتاً
     const searchBtn = document.querySelector('#challengesContent button:last-child');
-    const originalText = searchBtn?.innerText;
-    if (searchBtn) searchBtn.innerText = '⏳ جاري البحث...';
+    const originalText = searchBtn?.innerHTML;
+    if (searchBtn) {
+        searchBtn.innerHTML = '⏳ جاري البحث...';
+        searchBtn.disabled = true;
+    }
     
     try {
-        let targetUser = null;
-        let targetId = null;
-        let targetName = null;
+        console.log('🔍 جاري البحث عن:', email);
         
-        // حالة 1: البحث بالبريد الإلكتروني (الأفضل)
-        if (searchValue.includes('@')) {
-            const snapshot = await db.collection('users')
-                .where('email', '==', searchValue)
-                .limit(1)
-                .get();
-            
-            if (!snapshot.empty) {
-                targetUser = snapshot.docs[0];
-                targetId = targetUser.id;
-                targetName = targetUser.data().name;
+        // البحث عن المستخدم بالبريد الإلكتروني
+        const snapshot = await db.collection('users')
+            .where('email', '==', email)
+            .limit(1)
+            .get();
+        
+        if (snapshot.empty) {
+            alert(`❌ لم يتم العثور على مستخدم بالبريد: ${email}\n\nتأكد من أن الصديق مسجل في اللعبة`);
+            if (searchBtn) {
+                searchBtn.innerHTML = originalText || '➕ إضافة صديق';
+                searchBtn.disabled = false;
             }
-        }
-        
-        // حالة 2: البحث بالمعرف (UID)
-        if (!targetUser) {
-            const doc = await db.collection('users').doc(searchValue).get();
-            if (doc.exists) {
-                targetUser = doc;
-                targetId = searchValue;
-                targetName = doc.data().name;
-            }
-        }
-        
-        if (!targetUser) {
-            alert(`❌ لم يتم العثور على مستخدم\n\n💡 يمكنك البحث بـ:\n• البريد الإلكتروني (example@mail.com)\n• معرف المستخدم (UID)`);
-            if (searchBtn) searchBtn.innerText = originalText || '➕ إضافة صديق';
             return;
         }
+        
+        const targetUser = snapshot.docs[0];
+        const targetId = targetUser.id;
+        const targetName = targetUser.data().name || 'صديق';
         
         // منع إضافة النفس
         if (targetId === currentUser.uid) {
             alert('❌ لا يمكنك إضافة نفسك كصديق');
-            if (searchBtn) searchBtn.innerText = originalText || '➕ إضافة صديق';
+            if (searchBtn) {
+                searchBtn.innerHTML = originalText || '➕ إضافة صديق';
+                searchBtn.disabled = false;
+            }
             return;
         }
         
@@ -5714,7 +5711,10 @@ async function searchAndAddFriend() {
         
         if (isAlreadyFriend) {
             alert(`✅ ${targetName} هو بالفعل صديقك!`);
-            if (searchBtn) searchBtn.innerText = originalText || '➕ إضافة صديق';
+            if (searchBtn) {
+                searchBtn.innerHTML = originalText || '➕ إضافة صديق';
+                searchBtn.disabled = false;
+            }
             return;
         }
         
@@ -5728,24 +5728,31 @@ async function searchAndAddFriend() {
             })
         }, { merge: true });
         
-        alert(`✅ تم إرسال طلب صداقة إلى ${targetName}\n✉️ البريد: ${searchValue.includes('@') ? searchValue : targetUser?.data()?.email || 'غير متوفر'}`);
+        alert(`✅ تم إرسال طلب صداقة إلى ${targetName}\n📧 البريد: ${email}\n\n✉️ سيصله الطلب عندما يسجل دخوله`);
         
         // تفريغ الحقل
-        if (input) input.value = '';
+        input.value = '';
         
         // تحديث الواجهة
-        setTimeout(() => {
-            loadFriendsData();
-            showRequestsTab();
-        }, 1000);
+        await loadFriendsData();
+        showRequestsTab();
         
     } catch (error) {
-        console.error('❌ خطأ:', error);
-        alert('❌ حدث خطأ. تأكد من اتصال الإنترنت وحاول مرة أخرى');
-    }
-    
-    if (searchBtn) searchBtn.innerText = originalText || '➕ إضافة صديق';
+        console.error('❌ خطأ في البحث:', error);
+        
+        let errorMsg = '❌ حدث خطأ. تأكد من اتصال الإنترنت';
+        if (error.code === 'permission-denied') {
+            errorMsg = '❌ مشكلة في الصلاحيات. تأكد من قواعد Firebase';
         }
+        alert(errorMsg);
+        
+    } finally {
+        if (searchBtn) {
+            searchBtn.innerHTML = originalText || '➕ إضافة صديق';
+            searchBtn.disabled = false;
+        }
+    }
+}
 
 // ===== قبول طلب صداقة =====
 async function acceptFriendRequest(friendId, friendName) {

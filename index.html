@@ -2118,7 +2118,17 @@ document.addEventListener('click', function(event) {
             },
             
             // معالجة الدفع بالبطاقة عبر Stripe
-            
+            processCardPayment: async function() {
+    const purchase = this.currentPurchase;
+    
+    // وضع ديمو بسيط - لا يحتاج PayPal
+    if (confirm(`🎮 شراء تجريبي: ${purchase.name}\n💰 السعر: $${purchase.priceUSD}\n\n✅ هل تريد المتابعة؟`)) {
+        this.applyPurchase(purchase);
+        this.logTransaction({ type: 'demo_purchase', item: purchase.id, amount: purchase.priceUSD, success: true });
+        closePanel('securePaymentPanel');
+        alert(`✅ تم الشراء بنجاح (تجريبي)!\nحصلت على: ${purchase.name}`);
+    }
+        }
 
             // تطبيق الشراء بعد النجاح
             applyPurchase: function(purchase) {

@@ -5649,18 +5649,13 @@ function showRequestsTab() {
     container.innerHTML = html;
 }
 
-// ===== البحث عن صديق باستخدام playerName =====
 async function searchAndAddFriend() {
     const input = document.getElementById('friendSearchInput');
-    if (!input) {
-        console.error('❌ حقل البحث غير موجود');
-        return;
-    }
+    if (!input) return;
     
     const username = input.value.trim();
-    
     if (!username) {
-        alert('❌ أدخل اسم المستخدم للصديق');
+        alert('❌ أدخل اسم المستخدم');
         return;
     }
     
@@ -5674,20 +5669,13 @@ async function searchAndAddFriend() {
     try {
         console.log('🔍 جاري البحث عن:', username);
         
-        // 🔥 استخدم playerName بدلاً من name
-        const allUsersSnapshot = await db.collection('users').get();
+        const snapshot = await db.collection('users')
+            .where('name', '==', username)
+            .limit(1)
+            .get();
         
-        let foundUser = null;
-        allUsersSnapshot.forEach(doc => {
-            const userData = doc.data();
-            // بحث بـ playerName (اسم اللاعب كما هو مخزن)
-            if (userData.playerName && userData.playerName.toLowerCase() === username.toLowerCase()) {
-                foundUser = { id: doc.id, ...userData };
-            }
-        });
-        
-        if (!foundUser) {
-            alert(`❌ لم يتم العثور على مستخدم باسم: "${username}"\n\n💡 تأكد من كتابة الاسم بالضبط كما يظهر في اللعبة`);
+        if (snapshot.empty) {
+            alert(`❌ لم يتم العثور على مستخدم باسم: "${username}"`);
             if (searchBtn) {
                 searchBtn.innerHTML = originalText || '➕ إضافة صديق';
                 searchBtn.disabled = false;
@@ -5695,12 +5683,12 @@ async function searchAndAddFriend() {
             return;
         }
         
-        const targetId = foundUser.id;
-        const targetName = foundUser.playerName;  // ← استخدم playerName
+        const targetUser = snapshot.docs[0];
+        const targetId = targetUser.id;
+        const targetName = targetUser.data().name;
         
-        // منع إضافة النفس
         if (targetId === currentUser.uid) {
-            alert('❌ لا يمكنك إضافة نفسك كصديق');
+            alert('❌ لا يمكنك إضافة نفسك');
             if (searchBtn) {
                 searchBtn.innerHTML = originalText || '➕ إضافة صديق';
                 searchBtn.disabled = false;
@@ -5708,13 +5696,10 @@ async function searchAndAddFriend() {
             return;
         }
         
-        // التحقق: هل هو صديق بالفعل؟
         const socialDoc = await db.collection('social').doc(currentUser.uid).get();
         const existingFriends = socialDoc.data()?.friends || [];
-        const isAlreadyFriend = existingFriends.some(f => f.id === targetId);
-        
-        if (isAlreadyFriend) {
-            alert(`✅ ${targetName} هو بالفعل صديقك!`);
+        if (existingFriends.some(f => f.id === targetId)) {
+            alert(`✅ ${targetName} هو بالفعل صديقك`);
             if (searchBtn) {
                 searchBtn.innerHTML = originalText || '➕ إضافة صديق';
                 searchBtn.disabled = false;
@@ -5722,7 +5707,6 @@ async function searchAndAddFriend() {
             return;
         }
         
-        // إرسال طلب صداقة
         await db.collection('social').doc(targetId).set({
             requests: firebase.firestore.FieldValue.arrayUnion({
                 fromId: currentUser.uid,
@@ -5733,13 +5717,12 @@ async function searchAndAddFriend() {
         
         alert(`✅ تم إرسال طلب صداقة إلى ${targetName}`);
         input.value = '';
-        
         await loadFriendsData();
         showRequestsTab();
         
     } catch (error) {
         console.error('❌ خطأ:', error);
-        alert('❌ حدث خطأ. تأكد من اتصال الإنترنت');
+        alert('❌ حدث خطأ: ' + error.message);
     } finally {
         if (searchBtn) {
             searchBtn.innerHTML = originalText || '➕ إضافة صديق';
@@ -5747,6 +5730,8 @@ async function searchAndAddFriend() {
         }
     }
         }
+    
+        
 
         
         

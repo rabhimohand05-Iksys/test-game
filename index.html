@@ -2119,44 +2119,7 @@ document.addEventListener('click', function(event) {
             
             // معالجة الدفع بالبطاقة عبر Stripe
             // معالجة الدفع عبر PayPal و Stripe
-processCardPayment: async function() {
-    const purchase = this.currentPurchase;
-    
-    // PayPal
-    if (this.selectedMethod === 'paypal') {
-        const container = document.getElementById('paymentButtonContainer');
-        container.innerHTML = '<div id="paypal-button-container" style="min-height: 100px;"></div>';
-        
-        paypal.Buttons({
-            style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
-            createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: { currency_code: 'USD', value: purchase.priceUSD.toString() },
-                        description: purchase.name
-                    }],
-                    application_context: { shipping_preference: 'NO_SHIPPING', brand_name: 'Knapsack Game' }
-                });
-            },
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    SecurePayment.applyPurchase(purchase);
-                    SecurePayment.logTransaction({ type: 'paypal_purchase', item: purchase.id, amount: purchase.priceUSD, success: true });
-                    closePanel('securePaymentPanel');
-                    alert(`✅ تم الشراء بنجاح! حصلت على ${purchase.name}`);
-                });
-            },
-            onError: function(err) {
-                console.error('PayPal error:', err);
-                alert('❌ حدث خطأ في الدفع عبر PayPal. حاول مرة أخرى.');
-            }
-        }).render('#paypal-button-container');
-        return;
-    }
-    
-    // Stripe (سيتم تفعيله لاحقاً)
-    alert('💳 الدفع عبر Stripe قيد التطوير. استخدم PayPal حالياً.');
-        }
+
             // تطبيق الشراء بعد النجاح
             applyPurchase: function(purchase) {
                 switch(purchase.type) {

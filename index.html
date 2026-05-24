@@ -5644,6 +5644,7 @@ function showRequestsTab() {
     container.innerHTML = html;
 }
 
+
 async function searchAndAddFriend() {
     const input = document.getElementById('friendSearchInput');
     if (!input) return;
@@ -5703,12 +5704,12 @@ async function searchAndAddFriend() {
         }
         
         await db.collection('social').doc(targetId).set({
-    requests: firebase.firestore.FieldValue.arrayUnion({
-        fromId: currentUser.uid,
-        fromName: currentUser.displayName,
-        timestamp: new Date()  // ← هذا هو التعديل
-    })
-}, { merge: true });
+            requests: firebase.firestore.FieldValue.arrayUnion({
+                fromId: currentUser.uid,
+                fromName: currentUser.displayName,
+                timestamp: new Date()
+            })
+        }, { merge: true });
         
         alert(`✅ تم إرسال طلب صداقة إلى ${targetName}`);
         input.value = '';
@@ -5724,7 +5725,7 @@ async function searchAndAddFriend() {
             searchBtn.disabled = false;
         }
     }
-        }
+        }        
     
         
 

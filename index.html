@@ -9015,62 +9015,7 @@ console.log('✅ تم إضافة زر نسخ UID في لوحة الإحصائي�
     
     </script>
 
-    <script>
-// ===== BOUTON BUY ME A COFFEE =====
-(function() {
-    // VOTRE LIEN OFFICIEL
-    const DONATION_LINK = 'https://buymeacoffee.com/rabhi.mohand';
     
-    // Créer le bouton
-    const btn = document.createElement('div');
-    btn.innerHTML = `
-        <div style="
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #ffdd00, #ffaa00);
-            border-radius: 50px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            z-index: 10000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-            font-family: 'Tajawal', sans-serif;
-            font-weight: bold;
-            color: #333;
-            font-size: 0.9rem;
-        ">
-            <span style="font-size: 1.3rem;">☕</span>
-            <span>Soutenir Rabhi.Mohand</span>
-        </div>
-    `;
-    
-    // Effet au survol
-    btn.onmouseover = () => {
-        btn.querySelector('div').style.transform = 'scale(1.05)';
-        btn.querySelector('div').style.boxShadow = '0 8px 25px rgba(0,0,0,0.3)';
-    };
-    btn.onmouseleave = () => {
-        btn.querySelector('div').style.transform = 'scale(1)';
-        btn.querySelector('div').style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
-    };
-    
-    // Ouvrir le lien au clic
-    btn.onclick = () => {
-        window.open(DONATION_LINK, '_blank');
-    };
-    
-    // Ajouter au jeu
-    setTimeout(() => {
-        document.body.appendChild(btn);
-        console.log('☕ Bouton Buy Me a Coffee ajouté !');
-        console.log('🔗 Lien:', DONATION_LINK);
-    }, 2000);
-})();
-        </script>
       
 </body>
 </html>

@@ -2,41 +2,6 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <script>
-// منع المواقع الخبيثة
-(function() {
-    const badSites = ['slothoka', 'casino', 'slot', 'gambling', 'bet', 'live', 'profit', 'cpm', 'adsterra'];
-    const originalOpen = window.open;
-    
-    window.open = function(url) {
-        if(url) {
-            for(let site of badSites) {
-                if(url.includes(site)) {
-                    console.log('🚫 تم حظر الموقع:', url);
-                    return null;
-                }
-            }
-        }
-        return originalOpen(url);
-    };
-    
-    // منع تغيير الرابط
-    const originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
-    Object.defineProperty(window, 'location', {
-        set: function(url) {
-            if(url) {
-                for(let site of badSites) {
-                    if(url.includes(site)) {
-                        console.log('🚫 تم حظر تغيير الرابط:', url);
-                        return;
-                    }
-                }
-            }
-            originalLocation.set.call(this, url);
-        }
-    });
-})();
-    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Knapsack Game - النسخة النهائية</title>
     <!-- Firebase SDK -->
@@ -1972,7 +1937,7 @@ html {
     </div>
     <script>
 // رابط Popunder الخاص بك
-const POPUNDER_LINK = 'https://pl29198131.profitablecpmratenetwork.com/71/0b/f7/710bf77097f5170f41a94a792861246c';
+//const POPUNDER_LINK = 'https://pl29198131.profitablecpmratenetwork.com/71/0b/f7/710bf77097f5170f41a94a792861246c';
 
 // عدد الأيام بين كل ظهور (يومين)
 const AD_INTERVAL_DAYS = 1;

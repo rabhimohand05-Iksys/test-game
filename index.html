@@ -1958,23 +1958,7 @@ function recordAdShow() {
     localStorage.setItem('popunder_last_show', new Date().toISOString());
 }
 
-// دالة لعرض الإعلان
-function showPopunderOnce() {
-    if (canShowAd()) {
-        window.open(POPUNDER_LINK, '_blank');
-        recordAdShow();
-        console.log('✅ تم فتح الإعلان - سيعود بعد يومين');
-    } else {
-        console.log('⏳ سيظهر الإعلان بعد يومين');
-    }
-}
 
-// عند الضغط على أي زر في اللعبة
-document.addEventListener('click', function(event) {
-    let button = event.target.closest('button, .world-btn, .feature-card, .toolbar-btn, .leaderboard-btn, .daily-reward-btn, .feature-main-btn, .world-item');
-    if (button) {
-        //showPopunderOnce();
-    }
 });
     
     </script>

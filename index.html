@@ -1935,33 +1935,7 @@ html {
     <div class="result-screen" id="resultScreen">
         <div class="result-box" id="resultBox"></div>
     </div>
-    <script>
-// رابط Popunder الخاص بك
-//const POPUNDER_LINK = 'https://pl29198131.profitablecpmratenetwork.com/71/0b/f7/710bf77097f5170f41a94a792861246c';
-
-// عدد الأيام بين كل ظهور (يومين)
-const AD_INTERVAL_DAYS = 1;
-
-// دالة للتحقق: هل مر يومين على آخر ظهور؟
-function canShowAd() {
-    const lastShow = localStorage.getItem('popunder_last_show');
-    if (!lastShow) return true;  // لم يظهر من قبل
     
-    const lastDate = new Date(lastShow);
-    const currentDate = new Date();
-    const hoursDiff = (currentDate - lastDate) / (1000 * 60 * 60);
-    return hoursDiff >= (AD_INTERVAL_DAYS * 24);  // 48 ساعة
-}
-
-// دالة لتسجيل تاريخ ظهور الإعلان
-function recordAdShow() {
-    localStorage.setItem('popunder_last_show', new Date().toISOString());
-}
-
-
-});
-    
-    </script>
     <script>
         // ===== إعدادات Firebase =====
         const firebaseConfig = {

@@ -3677,22 +3677,28 @@ if (!document.querySelector('#openWorldStyles')) {
         // ===== تصحيح دالة closePanel =====
 function closePanel(panelId) {
     const panel = document.getElementById(panelId);
-    if (!panel) return;
     
-    // ✅ إخفاء اللوحة
+    // إخفاء اللوحة
     panel.style.display = 'none';
     
-    // ✅ إفراغ المحتوى فوراً (بدون تأخير)
-    panel.innerHTML = '';
+    // إزالة أي أحداث عالقة
+    const closeButtons = panel.querySelectorAll('.panel-close');
+    closeButtons.forEach(btn => {
+        btn.onclick = null; // إزالة الحدث القديم
+    });
     
-    // ✅ إعادة بناء المحتوى الافتراضي فوراً (بدون تأخير)
-    if (panelId === 'basicFeaturesPanel') {
-        panel.innerHTML = getDefaultBasicFeaturesHTML();
-    } else if (panelId === 'paymentFeaturesPanel') {
-        panel.innerHTML = getDefaultPaymentFeaturesHTML();
-    } else if (panelId === 'securePaymentPanel') {
-        panel.innerHTML = getDefaultSecurePaymentHTML();
-    }
+    // إعادة تعيين المحتوى إلى الحالة الافتراضية بعد تأخير بسيط
+    setTimeout(() => {
+        if (panelId === 'basicFeaturesPanel') {
+            // إعادة المحتوى الافتراضي للوحة الأساسية
+            panel.innerHTML = getDefaultBasicFeaturesHTML();
+        } else if (panelId === 'paymentFeaturesPanel') {
+            // إعادة المحتوى الافتراضي للوحة المدفوعات
+            panel.innerHTML = getDefaultPaymentFeaturesHTML();
+        } else if (panelId === 'securePaymentPanel') {
+            panel.innerHTML = getDefaultSecurePaymentHTML();
+        }
+    }, 100);
         }
 // ===== دوال إعادة المحتوى الافتراضي =====
 function getDefaultBasicFeaturesHTML() {

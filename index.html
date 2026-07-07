@@ -4560,14 +4560,7 @@ function showAchievements() {
         function showLevel() {
     closeAllPanels();
     
-    // ✅ التحقق: هل هناك أرباح صناديق؟
-    if (window.myBoxRewards && window.myBoxRewards.length > 100) {
-        // ✅ إذا كان هناك أرباح، استخدم showMyBoxLevel
-        if (typeof showMyBoxLevel === 'function') {
-            showMyBoxLevel();
-            return;
-        }
-    }
+
     
     // ✅ إذا لم تكن هناك أرباح، اعرض المستوى العادي
     const nextLevelXP = (playerLevel || 1) * 100;

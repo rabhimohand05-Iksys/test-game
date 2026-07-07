@@ -8785,7 +8785,8 @@ function showMyBoxLevel() {
     const html = `
         <div class="panel-header">
             <div class="panel-title"><span>📊</span> المستوى والخبرة</div>
-            <div class="panel-close" onclick="closePanel('basicFeaturesPanel')">✕</div>
+            <!-- ✅ التغيير هنا: إضافة showBasicFeatures() -->
+            <div class="panel-close" onclick="closePanel('basicFeaturesPanel'); showBasicFeatures();">✕</div>
         </div>
         <div style="text-align:center; padding:20px;">
             <div style="font-size:2rem;">📊</div>
@@ -8800,7 +8801,7 @@ function showMyBoxLevel() {
     
     document.getElementById('basicFeaturesPanel').innerHTML = html;
     document.getElementById('basicFeaturesPanel').style.display = 'block';
-}
+        }
 
 // تعديل showLevel
 window.showLevel = function() {

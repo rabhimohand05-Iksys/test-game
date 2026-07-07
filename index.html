@@ -3729,20 +3729,13 @@ if (!document.querySelector('#openWorldStyles')) {
 
         // ===== تصحيح دالة closePanel =====
 function closePanel(panelId) {
+function closePanel(panelId) {
     const panel = document.getElementById(panelId);
     
-    // ✅ إصلاح خاص: إذا كانت اللوحة هي "basicFeaturesPanel" (الميزات الأساسية)
-    // والمحتوى الحالي هو "المستوى" (يحتوي على أرباح الصناديق)
+    // ✅ إذا كانت اللوحة هي basicFeaturesPanel، نغلقها فقط
     if (panelId === 'basicFeaturesPanel') {
-        // تحقق: هل المحتوى الحالي هو المستوى (يحتوي على عناصر أرباح)؟
-        const currentContent = panel.innerHTML;
-        if (currentContent.includes('أرباح الصناديق') || currentContent.includes('🎁 أرباح الصناديق')) {
-            // ✅ نعيد تعيين المحتوى إلى الميزات الأساسية فوراً
-            panel.innerHTML = getDefaultBasicFeaturesHTML();
-            panel.style.display = 'none';
-            console.log('✅ تم إغلاق المستوى والعودة إلى الميزات الأساسية');
-            return;
-        }
+        panel.style.display = 'none';
+        return;
     }
     
     // إخفاء اللوحة
@@ -3751,21 +3744,8 @@ function closePanel(panelId) {
     // إزالة أي أحداث عالقة
     const closeButtons = panel.querySelectorAll('.panel-close');
     closeButtons.forEach(btn => {
-        btn.onclick = null; // إزالة الحدث القديم
+        btn.onclick = null;
     });
-    
-    // إعادة تعيين المحتوى إلى الحالة الافتراضية بعد تأخير بسيط
-    setTimeout(() => {
-        if (panelId === 'basicFeaturesPanel') {
-            // إعادة المحتوى الافتراضي للوحة الأساسية
-            panel.innerHTML = getDefaultBasicFeaturesHTML();
-        } else if (panelId === 'paymentFeaturesPanel') {
-            // إعادة المحتوى الافتراضي للوحة المدفوعات
-            panel.innerHTML = getDefaultPaymentFeaturesHTML();
-        } else if (panelId === 'securePaymentPanel') {
-            panel.innerHTML = getDefaultSecurePaymentHTML();
-        }
-    }, 100);
     }
 // ===== دوال إعادة المحتوى الافتراضي =====
 function getDefaultBasicFeaturesHTML() {

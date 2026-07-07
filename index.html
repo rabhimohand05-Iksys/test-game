@@ -3665,61 +3665,8 @@ if (!document.querySelector('#openWorldStyles')) {
         function showBasicFeatures() {
     closeAllPanels();
     closeWheel();
-    
-    const panel = document.getElementById('basicFeaturesPanel');
-    
-    // ✅ تعبئة المحتوى بشكل صحيح (الميزات الأساسية وليس المستوى)
-    panel.innerHTML = `
-        <div class="panel-header">
-            <div class="panel-title"><span>📋</span> الميزات الأساسية</div>
-            <div class="panel-close" onclick="closePanel('basicFeaturesPanel')">✕</div>
-        </div>
-        <div class="feature-card" onclick="showAchievements()">
-            <div class="feature-icon">🏆</div>
-            <div class="feature-info">
-                <div class="feature-name">الإنجازات</div>
-                <div class="feature-desc">تتبع تقدمك وإنجازاتك</div>
-            </div>
-        </div>
-        <div class="feature-card" onclick="showShop()">
-            <div class="feature-icon">🛒</div>
-            <div class="feature-info">
-                <div class="feature-name">المتجر</div>
-                <div class="feature-desc">اشتر عناصر مفيدة</div>
-            </div>
-        </div>
-        <div class="feature-card" onclick="showLevel()">
-            <div class="feature-icon">📊</div>
-            <div class="feature-info">
-                <div class="feature-name">المستوى</div>
-                <div class="feature-desc">تتبع مستواك ونقاط الخبرة</div>
-            </div>
-        </div>
-        <div class="feature-card" onclick="showChallenges()">
-            <div class="feature-icon">⚔️</div>
-            <div class="feature-info">
-                <div class="feature-name">التحديات والأصدقاء</div>
-                <div class="feature-desc">تحدى أصدقاءك واربح نقاطاً</div>
-            </div>
-        </div>
-        <div class="feature-card" onclick="showStatistics()">
-            <div class="feature-icon">📈</div>
-            <div class="feature-info">
-                <div class="feature-name">الإحصائيات</div>
-                <div class="feature-desc">إحصائيات متقدمة عن تقدمك</div>
-            </div>
-        </div>
-        <div class="feature-card" onclick="showQuests()">
-            <div class="feature-icon">📋</div>
-            <div class="feature-info">
-                <div class="feature-name">المهام</div>
-                <div class="feature-desc">المهام اليومية والأسبوعية</div>
-            </div>
-        </div>
-    `;
-    
-    panel.style.display = 'block';
-        }
+    document.getElementById('basicFeaturesPanel').style.display = 'block';
+    }
 
         function showPaymentFeatures() {
             closeAllPanels();
@@ -3731,12 +3678,6 @@ if (!document.querySelector('#openWorldStyles')) {
 function closePanel(panelId) {
     const panel = document.getElementById(panelId);
     
-    // ✅ إذا كانت اللوحة هي basicFeaturesPanel، نغلقها فقط
-    if (panelId === 'basicFeaturesPanel') {
-        panel.style.display = 'none';
-        return;
-    }
-    
     // إخفاء اللوحة
     panel.style.display = 'none';
     
@@ -3745,6 +3686,17 @@ function closePanel(panelId) {
     closeButtons.forEach(btn => {
         btn.onclick = null;
     });
+    
+    // إعادة تعيين المحتوى إلى الحالة الافتراضية بعد تأخير بسيط
+    setTimeout(() => {
+        if (panelId === 'basicFeaturesPanel') {
+            panel.innerHTML = getDefaultBasicFeaturesHTML();
+        } else if (panelId === 'paymentFeaturesPanel') {
+            panel.innerHTML = getDefaultPaymentFeaturesHTML();
+        } else if (panelId === 'securePaymentPanel') {
+            panel.innerHTML = getDefaultSecurePaymentHTML();
+        }
+    }, 100);
     }
 // ===== دوال إعادة المحتوى الافتراضي =====
 function getDefaultBasicFeaturesHTML() {

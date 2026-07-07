@@ -3678,6 +3678,20 @@ if (!document.querySelector('#openWorldStyles')) {
 function closePanel(panelId) {
     const panel = document.getElementById(panelId);
     
+    // ✅ إصلاح خاص: إذا كانت اللوحة هي "basicFeaturesPanel" (الميزات الأساسية)
+    // والمحتوى الحالي هو "المستوى" (يحتوي على أرباح الصناديق)
+    if (panelId === 'basicFeaturesPanel') {
+        // تحقق: هل المحتوى الحالي هو المستوى (يحتوي على عناصر أرباح)؟
+        const currentContent = panel.innerHTML;
+        if (currentContent.includes('أرباح الصناديق') || currentContent.includes('🎁 أرباح الصناديق')) {
+            // ✅ نعيد تعيين المحتوى إلى الميزات الأساسية فوراً
+            panel.innerHTML = getDefaultBasicFeaturesHTML();
+            panel.style.display = 'none';
+            console.log('✅ تم إغلاق المستوى والعودة إلى الميزات الأساسية');
+            return;
+        }
+    }
+    
     // إخفاء اللوحة
     panel.style.display = 'none';
     
@@ -3699,7 +3713,7 @@ function closePanel(panelId) {
             panel.innerHTML = getDefaultSecurePaymentHTML();
         }
     }, 100);
-        }
+    }
 // ===== دوال إعادة المحتوى الافتراضي =====
 function getDefaultBasicFeaturesHTML() {
     return `

@@ -8749,7 +8749,6 @@ function showMyBoxLevel() {
     const nextLevelXP = (playerLevel || 1) * 100;
     const progress = ((playerXP || 0) / nextLevelXP) * 100;
     
-    // تجميع المكررات
     const groups = {};
     window.myBoxRewards.forEach(r => {
         if (!groups[r.icon]) groups[r.icon] = { icon: r.icon, points: r.points, count: 0, ids: [] };
@@ -8785,13 +8784,24 @@ function showMyBoxLevel() {
     const html = `
         <div class="panel-header">
             <div class="panel-title"><span>📊</span> المستوى والخبرة</div>
-            <div class="panel-close" onclick="
-                // ✅ إغلاق اللوحة مباشرة
+            <!-- ✅ زر ❌ مخصص فقط للمستوى -->
+            <div onclick="
                 document.getElementById('basicFeaturesPanel').style.display = 'none';
-                // ✅ عرض الميزات الأساسية بعد تأخير بسيط
                 setTimeout(function() {
                     showBasicFeatures();
                 }, 50);
+            " style="
+                width: 40px;
+                height: 40px;
+                background: rgba(255,255,255,0.1);
+                border: 2px solid gold;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                cursor: pointer;
+                transition: all 0.3s;
             ">✕</div>
         </div>
         <div style="text-align:center; padding:20px;">
@@ -8807,7 +8817,7 @@ function showMyBoxLevel() {
     
     document.getElementById('basicFeaturesPanel').innerHTML = html;
     document.getElementById('basicFeaturesPanel').style.display = 'block';
-        }
+}
 
 // تعديل showLevel
 window.showLevel = function() {

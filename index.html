@@ -8772,32 +8772,8 @@ function showMyBoxLevel() {
     const html = `
         <div class="panel-header">
             <div class="panel-title"><span>📊</span> المستوى والخبرة</div>
-            <div onclick="
-                // ✅ إلغاء أي timeout سابق
-                if (window._closeTimeout) {
-                    clearTimeout(window._closeTimeout);
-                    window._closeTimeout = null;
-                }
-                // إخفاء اللوحة
-                document.getElementById('basicFeaturesPanel').style.display = 'none';
-                // عرض الميزات الأساسية بعد تأخير
-                window._closeTimeout = setTimeout(function() {
-                    showBasicFeatures();
-                    window._closeTimeout = null;
-                }, 100);
-            " style="
-                width: 40px;
-                height: 40px;
-                background: rgba(255,255,255,0.1);
-                border: 2px solid gold;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-                cursor: pointer;
-                transition: all 0.3s;
-            ">✕</div>
+            <!-- ✅ زر ❌ عادي مثل showLevel -->
+            <div class="panel-close" onclick="closePanel('basicFeaturesPanel')">✕</div>
         </div>
         <div style="text-align:center; padding:20px;">
             <div style="font-size:2rem;">📊</div>
@@ -8812,7 +8788,7 @@ function showMyBoxLevel() {
     
     document.getElementById('basicFeaturesPanel').innerHTML = html;
     document.getElementById('basicFeaturesPanel').style.display = 'block';
-        }
+}
 // تعديل showLevel
 window.showLevel = function() {
     showMyBoxLevel();

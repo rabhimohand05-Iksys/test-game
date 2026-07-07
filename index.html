@@ -3678,6 +3678,12 @@ if (!document.querySelector('#openWorldStyles')) {
 function closePanel(panelId) {
     const panel = document.getElementById(panelId);
     
+    // ✅ إذا كانت اللوحة هي basicFeaturesPanel، نغلقها فقط بدون إعادة تعيين
+    if (panelId === 'basicFeaturesPanel') {
+        panel.style.display = 'none';
+        return;
+    }
+    
     // إخفاء اللوحة
     panel.style.display = 'none';
     
@@ -3697,7 +3703,7 @@ function closePanel(panelId) {
             panel.innerHTML = getDefaultSecurePaymentHTML();
         }
     }, 100);
-    }
+}
 // ===== دوال إعادة المحتوى الافتراضي =====
 function getDefaultBasicFeaturesHTML() {
     return `

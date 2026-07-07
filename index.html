@@ -3740,17 +3740,9 @@ function closePanel(panelId) {
         btn.onclick = null;
     });
     
-    // إعادة تعيين المحتوى إلى الحالة الافتراضية بعد تأخير بسيط
-    setTimeout(() => {
-        if (panelId === 'basicFeaturesPanel') {
-            panel.innerHTML = getDefaultBasicFeaturesHTML();
-        } else if (panelId === 'paymentFeaturesPanel') {
-            panel.innerHTML = getDefaultPaymentFeaturesHTML();
-        } else if (panelId === 'securePaymentPanel') {
-            panel.innerHTML = getDefaultSecurePaymentHTML();
-        }
-    }, 100);
-        }
+    // ✅ لا نعيد تعيين المحتوى تلقائياً
+    // نترك showBasicFeatures تقوم بذلك عند الحاجة
+}
 // ===== دوال إعادة المحتوى الافتراضي =====
 function getDefaultBasicFeaturesHTML() {
     return `

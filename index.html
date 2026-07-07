@@ -8785,8 +8785,14 @@ function showMyBoxLevel() {
     const html = `
         <div class="panel-header">
             <div class="panel-title"><span>📊</span> المستوى والخبرة</div>
-            <!-- ✅ التغيير هنا: إضافة showBasicFeatures() -->
-            <div class="panel-close" onclick="closePanel('basicFeaturesPanel'); showBasicFeatures();">✕</div>
+            <div class="panel-close" onclick="
+                // ✅ إغلاق اللوحة مباشرة
+                document.getElementById('basicFeaturesPanel').style.display = 'none';
+                // ✅ عرض الميزات الأساسية بعد تأخير بسيط
+                setTimeout(function() {
+                    showBasicFeatures();
+                }, 50);
+            ">✕</div>
         </div>
         <div style="text-align:center; padding:20px;">
             <div style="font-size:2rem;">📊</div>

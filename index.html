@@ -3678,12 +3678,6 @@ if (!document.querySelector('#openWorldStyles')) {
 function closePanel(panelId) {
     const panel = document.getElementById(panelId);
     
-    // ✅ إذا كانت اللوحة هي basicFeaturesPanel، نغلقها فقط بدون إعادة تعيين
-    if (panelId === 'basicFeaturesPanel') {
-        panel.style.display = 'none';
-        return;
-    }
-    
     // إخفاء اللوحة
     panel.style.display = 'none';
     
@@ -3703,7 +3697,7 @@ function closePanel(panelId) {
             panel.innerHTML = getDefaultSecurePaymentHTML();
         }
     }, 100);
-}
+        }
 // ===== دوال إعادة المحتوى الافتراضي =====
 function getDefaultBasicFeaturesHTML() {
     return `
@@ -4566,25 +4560,13 @@ function showAchievements() {
         function showLevel() {
     closeAllPanels();
     
-
-    
-    // ✅ إذا لم تكن هناك أرباح، اعرض المستوى العادي
     const nextLevelXP = (playerLevel || 1) * 100;
     const progress = ((playerXP || 0) / nextLevelXP) * 100;
     
     const html = `
         <div class="panel-header">
             <div class="panel-title"><span>📊</span> المستوى والخبرة</div>
-            <button onclick="closePanel('basicFeaturesPanel'); showBasicFeatures();" style="
-                background: rgba(255,215,0,0.2);
-                border: 2px solid gold;
-                border-radius: 30px;
-                padding: 8px 20px;
-                color: white;
-                cursor: pointer;
-                font-family: 'Tajawal', sans-serif;
-                font-size: 0.9rem;
-            ">🔙 رجوع</button>
+            <div class="panel-close" onclick="closePanel('basicFeaturesPanel')">✕</div>
         </div>
         <div style="text-align: center; padding: 20px;">
             <div style="font-size: 4rem;">📊</div>

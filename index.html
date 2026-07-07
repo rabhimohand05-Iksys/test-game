@@ -4627,31 +4627,49 @@ function showAchievements() {
         }
 
         function showLevel() {
-            closeAllPanels();
-            
-            const nextLevelXP = (playerLevel || 1) * 100;
-            const progress = ((playerXP || 0) / nextLevelXP) * 100;
-            
-            const html = `
-                <div class="panel-header">
-                    <div class="panel-title"><span>📊</span> المستوى والخبرة</div>
-                    <div class="panel-close" onclick="closePanel('basicFeaturesPanel')">✕</div>
-                </div>
-                <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 4rem;">📊</div>
-                    <div style="font-size: 2rem; color: gold;">المستوى ${playerLevel || 1}</div>
-                    <div class="progress-bar" style="margin: 20px 0;">
-                        <div class="progress-fill" style="width: ${progress}%"></div>
-                    </div>
-                    <div>${playerXP || 0} / ${nextLevelXP} خبرة</div>
-                </div>
-            `;
-            
-            const panel = document.getElementById('basicFeaturesPanel');
-            panel.innerHTML = html;
-            panel.style.display = 'block';
+    closeAllPanels();
+    
+    // ✅ التحقق: هل هناك أرباح صناديق؟
+    if (window.myBoxRewards && window.myBoxRewards.length > 0) {
+        // ✅ إذا كان هناك أرباح، استخدم showMyBoxLevel
+        if (typeof showMyBoxLevel === 'function') {
+            showMyBoxLevel();
+            return;
         }
-
+    }
+    
+    // ✅ إذا لم تكن هناك أرباح، اعرض المستوى العادي
+    const nextLevelXP = (playerLevel || 1) * 100;
+    const progress = ((playerXP || 0) / nextLevelXP) * 100;
+    
+    const html = `
+        <div class="panel-header">
+            <div class="panel-title"><span>📊</span> المستوى والخبرة</div>
+            <button onclick="closePanel('basicFeaturesPanel'); showBasicFeatures();" style="
+                background: rgba(255,215,0,0.2);
+                border: 2px solid gold;
+                border-radius: 30px;
+                padding: 8px 20px;
+                color: white;
+                cursor: pointer;
+                font-family: 'Tajawal', sans-serif;
+                font-size: 0.9rem;
+            ">🔙 رجوع</button>
+        </div>
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 4rem;">📊</div>
+            <div style="font-size: 2rem; color: gold;">المستوى ${playerLevel || 1}</div>
+            <div class="progress-bar" style="margin: 20px 0;">
+                <div class="progress-fill" style="width: ${progress}%"></div>
+            </div>
+            <div>${playerXP || 0} / ${nextLevelXP} خبرة</div>
+        </div>
+    `;
+    
+    const panel = document.getElementById('basicFeaturesPanel');
+    panel.innerHTML = html;
+    panel.style.display = 'block';
+    }
         function showCollections() {
             closeAllPanels();
             

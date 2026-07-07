@@ -4561,7 +4561,7 @@ function showAchievements() {
     closeAllPanels();
     
     // ✅ التحقق: هل هناك أرباح صناديق؟
-    if (window.myBoxRewards && window.myBoxRewards.length > 0) {
+    if (window.myBoxRewards && window.myBoxRewards.length > 100) {
         // ✅ إذا كان هناك أرباح، استخدم showMyBoxLevel
         if (typeof showMyBoxLevel === 'function') {
             showMyBoxLevel();

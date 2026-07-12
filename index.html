@@ -3726,23 +3726,156 @@ if (!document.querySelector('#openWorldStyles')) {
             closeWheel();
             document.getElementById('paymentFeaturesPanel').style.display = 'block';
         }
-
-        // ===== تصحيح دالة closePanel =====
+// ===== دالة إغلاق اللوحات - تعمل بشكل موحد =====
 function closePanel(panelId) {
     const panel = document.getElementById(panelId);
+    if (!panel) return;
     
     // إخفاء اللوحة
     panel.style.display = 'none';
     
-    // إزالة أي أحداث عالقة
-    const closeButtons = panel.querySelectorAll('.panel-close');
-    closeButtons.forEach(btn => {
-        btn.onclick = null;
-    });
+    // ✅ إعادة تعيين المحتوى حسب نوع اللوحة
+    if (panelId === 'basicFeaturesPanel') {
+        // إعادة تعيين الميزات الأساسية إلى وضعها الافتراضي
+        panel.innerHTML = getDefaultBasicFeaturesHTML();
+    } else if (panelId === 'paymentFeaturesPanel') {
+        // إعادة تعيين الميزات المدفوعة إلى وضعها الافتراضي
+        panel.innerHTML = getDefaultPaymentFeaturesHTML();
+    }
     
-    // ✅ لا نعيد تعيين المحتوى تلقائياً
-    // نترك showBasicFeatures تقوم بذلك عند الحاجة
+    console.log(`✅ تم إغلاق اللوحة: ${panelId}`);
 }
+
+// ===== دوال إعادة المحتوى الافتراضي =====
+function getDefaultBasicFeaturesHTML() {
+    return `
+        <div class="panel-header">
+            <div class="panel-title"><span>📋</span> الميزات الأساسية</div>
+            <div class="panel-close" onclick="closePanel('basicFeaturesPanel')">✕</div>
+        </div>
+        <div class="feature-card" onclick="showAchievements()">
+            <div class="feature-icon">🏆</div>
+            <div class="feature-info">
+                <div class="feature-name">الإنجازات</div>
+                <div class="feature-desc">تتبع تقدمك وإنجازاتك</div>
+            </div>
+        </div>
+        <div class="feature-card" onclick="showShop()">
+            <div class="feature-icon">🛒</div>
+            <div class="feature-info">
+                <div class="feature-name">المتجر</div>
+                <div class="feature-desc">اشتر عناصر مفيدة</div>
+            </div>
+        </div>
+        <div class="feature-card" onclick="showLevel()">
+            <div class="feature-icon">📊</div>
+            <div class="feature-info">
+                <div class="feature-name">المستوى</div>
+                <div class="feature-desc">تتبع مستواك ونقاط الخبرة</div>
+            </div>
+        </div>
+        <div class="feature-card" onclick="showChallenges()">
+            <div class="feature-icon">⚔️</div>
+            <div class="feature-info">
+                <div class="feature-name">التحديات والأصدقاء</div>
+                <div class="feature-desc">تحدى أصدقاءك واربح نقاطاً</div>
+            </div>
+        </div>
+        <div class="feature-card" onclick="showStatistics()">
+            <div class="feature-icon">📈</div>
+            <div class="feature-info">
+                <div class="feature-name">الإحصائيات</div>
+                <div class="feature-desc">إحصائيات متقدمة عن تقدمك</div>
+            </div>
+        </div>
+        <div class="feature-card" onclick="showQuests()">
+            <div class="feature-icon">📋</div>
+            <div class="feature-info">
+                <div class="feature-name">المهام</div>
+                <div class="feature-desc">المهام اليومية والأسبوعية</div>
+            </div>
+        </div>
+    `;
+}
+
+function getDefaultPaymentFeaturesHTML() {
+    return `
+        <div class="panel-header">
+            <div class="panel-title"><span>💰</span> متجر الربح والمكافآت</div>
+            <div class="panel-close" onclick="closePanel('paymentFeaturesPanel')">✕</div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; background: rgba(255,215,0,0.1); border-radius: 15px;">
+            <span>💰 رصيدك:</span>
+            <span style="font-size: 1.3rem; color: gold;">💎 <span id="walletGems">${playerWallet?.gems || 0}</span></span>
+            <span style="font-size: 1.3rem; color: #4CAF50;">⭐ <span id="walletPoints">${currentUser?.score || 0}</span></span>
+        </div>
+        
+        <div class="feature-card premium-card" onclick="showVIPSubscription()">
+            <div class="feature-icon">👑</div>
+            <div class="feature-info">
+                <div class="feature-name">عضوية VIP ⭐</div>
+                <div class="feature-desc">مزايا حصرية: ضعف النقاط، عناصر أسطورية</div>
+                <div class="price-tag">من $2.99/شهرياً</div>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="showGemStore()">
+            <div class="feature-icon">💎</div>
+            <div class="feature-info">
+                <div class="feature-name">شراء الجواهر</div>
+                <div class="feature-desc">اشترِ الجواهر لفتح محتوى حصري</div>
+                <div class="price-tag">من $0.99</div>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="purchaseHintSystem()">
+            <div class="feature-icon">💡</div>
+            <div class="feature-info">
+                <div class="feature-name">نظام التلميحات</div>
+                <div class="feature-desc">تلميحات أثناء اللعب: الوزن، النقاط، أفضل نسبة</div>
+                <div class="price-tag">$2.99 أو 250 💎</div>
+            </div>
+        </div>
+        
+        <div class="feature-card premium-card" onclick="showUnlockOpenWorld()">
+            <div class="feature-icon">🗺️</div>
+            <div class="feature-info">
+                <div class="feature-name">العالم المفتوح</div>
+                <div class="feature-desc">افتح العالم المفتوح واستكشف مناطق جديدة</div>
+                <div class="price-tag">$4.99 أو 500 💎</div>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="showLootBoxes()">
+            <div class="feature-icon">📦</div>
+            <div class="feature-info">
+                <div class="feature-name">صناديق الكنوز</div>
+                <div class="feature-desc">افتح صناديق عشوائية واحصل على جوائز نادرة</div>
+                <div class="price-tag">$1.99 للصندوق</div>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="showSeasonPass()">
+            <div class="feature-icon">🎫</div>
+            <div class="feature-info">
+                <div class="feature-name">بطاقة الموسم</div>
+                <div class="feature-desc">مكافآت يومية لمدة 30 يوماً</div>
+                <div class="price-tag">$9.99/موسم</div>
+            </div>
+        </div>
+        
+        <div class="feature-card" onclick="showTransactionHistory()">
+            <div class="feature-icon">📜</div>
+            <div class="feature-info">
+                <div class="feature-name">سجل المعاملات</div>
+                <div class="feature-desc">عرض جميع مشترياتك السابقة</div>
+            </div>
+        </div>
+    `;
+        }
+        
+
 // ===== دوال إعادة المحتوى الافتراضي =====
 function getDefaultBasicFeaturesHTML() {
     return `
@@ -3907,51 +4040,103 @@ function getDefaultSecurePaymentHTML() {
             });
         }
 
-        function showGemStore() {
-            closeAllPanels();
-            
-            const panel = document.getElementById('paymentFeaturesPanel');
-            
-            let html = `
-                <div class="panel-header">
-                    <div class="panel-title"><span>💎</span> شراء الجواهر</div>
-                    <div class="panel-close" onclick="closePanel('paymentFeaturesPanel')">✕</div>
-                </div>
-                <div style="text-align: center; margin-bottom: 20px;">
-                    رصيدك الحالي: <span style="color: gold; font-size: 1.5rem;">${playerWallet.gems} 💎</span>
-                </div>
-            `;
-            
-            const gemPacks = [
-                { id: 'small', gems: 100, price: 0.99, icon: '💎' },
-                { id: 'medium', gems: 500, price: 4.99, bonus: 50, icon: '💎💎' },
-                { id: 'large', gems: 1200, price: 9.99, bonus: 200, icon: '💎💎💎' },
-                { id: 'mega', gems: 2500, price: 19.99, bonus: 500, icon: '👑💎' }
-            ];
-            
-            gemPacks.forEach(pack => {
-                html += `
-                    <div class="gem-package" onclick="SecurePayment.startPurchase({
-                        id: 'gems_${pack.id}',
-                        name: '${pack.gems} جواهر',
-                        icon: '${pack.icon}',
-                        description: '${pack.gems} جوهرة' + (pack.bonus ? ' + ${pack.bonus} هدية' : ''),
-                        priceUSD: ${pack.price},
-                        priceGems: null,
-                        type: 'gems',
-                        gemsAmount: ${pack.gems + (pack.bonus || 0)}
-                    })">
-                        <div>
-                            <span class="gem-amount">${pack.gems} 💎</span>
-                            ${pack.bonus ? `<span class="gem-bonus">+${pack.bonus} هدية</span>` : ''}
-                        </div>
-                        <div class="gem-price">$${pack.price}</div>
-                    </div>
-                `;
-            });
-            
-            panel.innerHTML = html;
-            panel.style.display = 'block';
+        // ===== دالة شراء الجواهر - بدون زر رجوع =====
+function showGemStore() {
+    closeAllPanels();
+    
+    const panel = document.getElementById('paymentFeaturesPanel');
+    
+    let html = `
+        <div class="panel-header">
+            <div class="panel-title"><span>💎</span> شراء الجواهر</div>
+            <div class="panel-close" onclick="closePanel('paymentFeaturesPanel')">✕</div>
+        </div>
+        <div style="text-align: center; margin-bottom: 20px; color: white;">
+            رصيدك الحالي: <span style="color: gold; font-size: 1.5rem;">${playerWallet?.gems || 0} 💎</span>
+        </div>
+        
+        <!-- ===== PACK 1 ===== -->
+        <div class="gem-package" onclick="buyGemsDirect(100, 0.99)" style="
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid gold;
+            transition: all 0.3s;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <div><span style="font-size: 1.5rem; color: gold;">100 💎</span></div>
+            <div style="background: #4CAF50; padding: 5px 15px; border-radius: 25px;">$0.99</div>
+        </div>
+        
+        <!-- ===== PACK 2 ===== -->
+        <div class="gem-package" onclick="buyGemsDirect(500, 4.99)" style="
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid gold;
+            transition: all 0.3s;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <div>
+                <span style="font-size: 1.5rem; color: gold;">500 💎</span>
+                <span style="background: #ff6b6b; padding: 2px 10px; border-radius: 20px; margin-left: 10px; font-size: 0.8rem;">+50 هدية</span>
+            </div>
+            <div style="background: #4CAF50; padding: 5px 15px; border-radius: 25px;">$4.99</div>
+        </div>
+        
+        <!-- ===== PACK 3 ===== -->
+        <div class="gem-package" onclick="buyGemsDirect(1200, 9.99)" style="
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid gold;
+            transition: all 0.3s;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <div>
+                <span style="font-size: 1.5rem; color: gold;">1200 💎</span>
+                <span style="background: #ff6b6b; padding: 2px 10px; border-radius: 20px; margin-left: 10px; font-size: 0.8rem;">+200 هدية</span>
+            </div>
+            <div style="background: #4CAF50; padding: 5px 15px; border-radius: 25px;">$9.99</div>
+        </div>
+        
+        <!-- ===== PACK 4 ===== -->
+        <div class="gem-package" onclick="buyGemsDirect(3000, 19.99)" style="
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid gold;
+            transition: all 0.3s;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <div>
+                <span style="font-size: 1.5rem; color: gold;">3000 💎</span>
+                <span style="background: #ff6b6b; padding: 2px 10px; border-radius: 20px; margin-left: 10px; font-size: 0.8rem;">+500 هدية</span>
+            </div>
+            <div style="background: #4CAF50; padding: 5px 15px; border-radius: 25px;">$19.99</div>
+        </div>
+        
+        <!-- ❌ تم إزالة زر رجوع نهائياً -->
+    `;
+    
+    panel.innerHTML = html;
+    panel.style.display = 'block';
         }
 
         function showUnlockOpenWorld() {

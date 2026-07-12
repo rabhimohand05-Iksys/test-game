@@ -4138,7 +4138,7 @@ function showGemStore() {
     panel.innerHTML = html;
     panel.style.display = 'block';
         }
-
+        
         function showUnlockOpenWorld() {
             SecurePayment.startPurchase({
                 id: 'openworld',
@@ -9282,118 +9282,6 @@ function buyGemsDirect(gems, price) {
     }).render('#paypal-button-container');
         }
 
-// ===== إصلاح دالة showGemStore =====
-function showGemStoreFixed() {
-    closeAllPanels();
-    
-    const panel = document.getElementById('paymentFeaturesPanel');
-    panel.innerHTML = `
-        <div class="panel-header">
-            <div class="panel-title"><span>💎</span> شراء الجواهر</div>
-            <div class="panel-close" onclick="closePanel('paymentFeaturesPanel')">✕</div>
-        </div>
-        <div style="text-align: center; margin-bottom: 20px; color: white;">
-            رصيدك الحالي: <span style="color: gold; font-size: 1.5rem;">${playerWallet?.gems || 0} 💎</span>
-        </div>
-        
-        <!-- ===== PACK 1 ===== -->
-        <div class="gem-package" onclick="buyGemsDirect(100, 0.99)" style="
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 15px;
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border: 2px solid gold;
-            transition: all 0.3s;
-        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-            <div><span style="font-size: 1.5rem; color: gold;">100 💎</span></div>
-            <div style="background: #4CAF50; padding: 5px 15px; border-radius: 25px;">$0.99</div>
-        </div>
-        
-        <!-- ===== PACK 2 ===== -->
-        <div class="gem-package" onclick="buyGemsDirect(500, 4.99)" style="
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 15px;
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border: 2px solid gold;
-            transition: all 0.3s;
-        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-            <div>
-                <span style="font-size: 1.5rem; color: gold;">500 💎</span>
-                <span style="background: #ff6b6b; padding: 2px 10px; border-radius: 20px; margin-left: 10px; font-size: 0.8rem;">+50 هدية</span>
-            </div>
-            <div style="background: #4CAF50; padding: 5px 15px; border-radius: 25px;">$4.99</div>
-        </div>
-        
-        <!-- ===== PACK 3 ===== -->
-        <div class="gem-package" onclick="buyGemsDirect(1200, 9.99)" style="
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 15px;
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border: 2px solid gold;
-            transition: all 0.3s;
-        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-            <div>
-                <span style="font-size: 1.5rem; color: gold;">1200 💎</span>
-                <span style="background: #ff6b6b; padding: 2px 10px; border-radius: 20px; margin-left: 10px; font-size: 0.8rem;">+200 هدية</span>
-            </div>
-            <div style="background: #4CAF50; padding: 5px 15px; border-radius: 25px;">$9.99</div>
-        </div>
-        
-        <!-- ===== PACK 4 ===== -->
-        <div class="gem-package" onclick="buyGemsDirect(3000, 19.99)" style="
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 15px;
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            border: 2px solid gold;
-            transition: all 0.3s;
-        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-            <div>
-                <span style="font-size: 1.5rem; color: gold;">3000 💎</span>
-                <span style="background: #ff6b6b; padding: 2px 10px; border-radius: 20px; margin-left: 10px; font-size: 0.8rem;">+500 هدية</span>
-            </div>
-            <div style="background: #4CAF50; padding: 5px 15px; border-radius: 25px;">$19.99</div>
-        </div>
-        
-        <div style="margin-top: 20px; text-align: center;">
-            <button onclick="showBasicFeatures()" style="
-                background: rgba(255,215,0,0.2);
-                border: 1px solid gold;
-                border-radius: 25px;
-                padding: 8px 20px;
-                color: white;
-                cursor: pointer;
-                transition: all 0.3s;
-            " onmouseover="this.style.background='rgba(255,215,0,0.4)'" onmouseout="this.style.background='rgba(255,215,0,0.2)'">
-                🔙 رجوع
-            </button>
-        </div>
-    `;
-    
-    panel.style.display = 'block';
-}
-
-// استبدال الدالة القديمة
-window.showGemStore = showGemStoreFixed;   
-    
     
     
     </script>

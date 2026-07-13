@@ -9281,7 +9281,126 @@ function buyGemsDirect(gems, price) {
     }).render('#paypal-button-container');
         }
 
-    
+// ==========================================
+// FONCTION UNIQUE POUR TOUS LES PAIEMENTS
+// ==========================================
+function payWithPaypal(price, gems, itemName) {
+    if (!currentUser) {
+        alert('❌ Veuillez vous connecter d\'abord');
+        return;
+    }
+
+    // Créer la popup de paiement
+    const modal = document.createElement('div');
+    modal.id = 'paypalModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        padding: 35px;
+        border-radius: 30px;
+        border: 4px solid gold;
+        z-index: 30000;
+        min-width: 340px;
+        max-width: 90%;
+        text-align: center;
+        box-shadow: 0 0 100px rgba(0,0,0,0.8);
+        animation: fadeIn 0.3s ease;
+    `;
+
+    modal.innerHTML = `
+        <div style="color: white; margin-bottom: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🔒</div>
+            <h2 style="color: gold; font-size: 1.5rem;">${itemName}</h2>
+            <div style="font-size: 1.8rem; margin: 15px 0; color: #4CAF50;">$${price}</div>
+            <div style="font-size: 0.9rem; color: #aaa;">💎 +${gems} gemmes</div>
+            <div style="font-size: 0.8rem; color: #ffaa00; margin-top: 5px;">Paiement sécurisé via PayPal</div>
+        </div>
+
+        <div id="paypal-button-container" style="margin: 15px 0;"></div>
+
+        <button onclick="document.getElementById('paypalModal').remove()" style="
+            background: rgba(255,68,68,0.8);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        " onmouseover="this.style.background='rgba(255,68,68,1)'" onmouseout="this.style.background='rgba(255,68,68,0.8)'">
+            ❌ Annuler
+        </button>
+        
+        <div style="margin-top: 15px; font-size: 0.7rem; color: #555;">
+            🔒 Transactions sécurisées et chiffrées
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // ===== INITIALISER PAYPAL =====
+    if (typeof paypal === 'undefined') {
+        alert('❌ PayPal n\'est pas chargé. Vérifie ta connexion.');
+        return;
+    }
+
+    paypal.Buttons({
+        style: {
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'rect',
+            label: 'paypal',
+            height: 45
+        },
+
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        currency_code: 'USD',
+                        value: price.toString()
+                    },
+                    description: `${gems} gemmes pour Knapsack Game`
+                }]
+            });
+        },
+
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                // ✅ AJOUTER LES GEMMES
+                playerWallet.gems += gems;
+                updatePlayerDisplay();
+                saveProgress();
+
+                // ✅ FERMER LA POPUP
+                const modalEl = document.getElementById('paypalModal');
+                if (modalEl) modalEl.remove();
+
+                // ✅ MESSAGE DE SUCCÈS
+                alert(`✅ Paiement réussi !\n💎 +${gems} gemmes ajoutées !\nMerci ${details.payer.name.given_name}`);
+                
+                // 🔥 Mettre à jour l'affichage du solde
+                document.getElementById('walletGems').textContent = playerWallet.gems;
+            });
+        },
+
+        onError: function(err) {
+            console.error('Erreur PayPal:', err);
+            alert('❌ Une erreur est survenue. Veuillez réessayer.');
+        },
+
+        onCancel: function(data) {
+            alert('❌ Paiement annulé.');
+            const modalEl = document.getElementById('paypalModal');
+            if (modalEl) modalEl.remove();
+        }
+
+    }).render('#paypal-button-container');
+        }    
     
     </script>
 

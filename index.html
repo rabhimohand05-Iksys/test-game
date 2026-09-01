@@ -9281,7 +9281,130 @@ function buyGemsDirect(gems, price) {
     }).render('#paypal-button-container');
         }
 
+// ==========================================
+// مزامنة playerInfo مع Firebase - حل نهائي
+// ==========================================
+
+let unsubscribePlayerInfo = null;
+
+// دالة تحديث بيانات المستخدم من Firebase
+function fetchAndUpdatePlayerInfo() {
+    if (!currentUser) {
+        console.log('⚠️ لا يوجد مستخدم');
+        return;
+    }
     
+    db.collection('users').doc(currentUser.uid).get()
+        .then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                
+                let changed = false;
+                
+                // التحقق من التغييرات
+                if (playerWallet.gems !== (data.gems || 0)) {
+                    playerWallet.gems = data.gems || 0;
+                    changed = true;
+                }
+                if (currentUser.score !== (data.score || 0)) {
+                    currentUser.score = data.score || 0;
+                    changed = true;
+                }
+                if (currentUser.displayName !== (data.name || 'زائر')) {
+                    currentUser.displayName = data.name || 'زائر';
+                    changed = true;
+                }
+                
+                if (changed) {
+                    updatePlayerDisplay();
+                    console.log('✅ تم تحديث playerInfo من Firebase');
+                }
+            }
+        })
+        .catch(err => console.error('❌ خطأ:', err));
+}
+
+// ===== الاستماع المباشر (Real-time) =====
+function startListeningToPlayerInfo() {
+    // إلغاء الاستماع السابق
+    if (unsubscribePlayerInfo) {
+        unsubscribePlayerInfo();
+        unsubscribePlayerInfo = null;
+    }
+    
+    if (!currentUser) return;
+    
+    console.log('👂 بدء الاستماع المباشر لـ Firebase...');
+    
+    unsubscribePlayerInfo = db.collection('users')
+        .doc(currentUser.uid)
+        .onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                
+                // تحديث مباشر
+                playerWallet.gems = data.gems || 0;
+                currentUser.score = data.score || 0;
+                currentUser.displayName = data.name || 'زائر';
+                
+                updatePlayerDisplay();
+                console.log('🔄 تحديث فوري:', {
+                    name: currentUser.displayName,
+                    score: currentUser.score,
+                    gems: playerWallet.gems
+                });
+            }
+        }, (error) => {
+            console.error('❌ خطأ في الاستماع:', error);
+        });
+}
+
+// ===== ربط مع نظام المصادقة =====
+const originalAuthHandler = auth.onAuthStateChanged;
+auth.onAuthStateChanged = async (user) => {
+    // تنفيذ الدالة الأصلية
+    if (originalAuthHandler) {
+        await originalAuthHandler(user);
+    }
+    
+    if (user) {
+        currentUser = user;
+        console.log('✅ مستخدم مسجل:', user.displayName);
+        
+        // انتظر قليلاً ثم ابدأ الاستماع
+        setTimeout(() => {
+            fetchAndUpdatePlayerInfo();
+            startListeningToPlayerInfo();
+        }, 1000);
+    } else {
+        // إلغاء الاستماع عند الخروج
+        if (unsubscribePlayerInfo) {
+            unsubscribePlayerInfo();
+            unsubscribePlayerInfo = null;
+        }
+        console.log('👂 تم إلغاء الاستماع');
+    }
+};
+
+// ===== تحديث عند العودة للصفحة =====
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && currentUser) {
+        console.log('👁️ العودة للصفحة - تحديث البيانات');
+        fetchAndUpdatePlayerInfo();
+    }
+});
+
+// ===== تحديث عند فتح اللوحات =====
+const originalShowLeaderboard = window.showLeaderboard;
+window.showLeaderboard = function() {
+    fetchAndUpdatePlayerInfo();
+    if (originalShowLeaderboard) {
+        originalShowLeaderboard();
+    }
+};
+
+console.log('✅ تم تفعيل المزامنة المباشرة مع Firebase');
+console.log('💡 أي تغيير في Firebase سيظهر فوراً في الواجهة');
     </script>
 
     

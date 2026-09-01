@@ -9281,16 +9281,14 @@ function buyGemsDirect(gems, price) {
     }).render('#paypal-button-container');
         }
 
-// ==========================================
-// مزامنة playerInfo مع Firebase - حل نهائي
+  // ==========================================
+// SYNCHRONISATION SIMPLIFIÉE - Version qui fonctionne
 // ==========================================
 
-let unsubscribePlayerInfo = null;
-
-// دالة تحديث بيانات المستخدم من Firebase
-function fetchAndUpdatePlayerInfo() {
+// Fonction de mise à jour
+function syncPlayerData() {
     if (!currentUser) {
-        console.log('⚠️ لا يوجد مستخدم');
+        console.log('⚠️ Pas d\'utilisateur');
         return;
     }
     
@@ -9298,10 +9296,8 @@ function fetchAndUpdatePlayerInfo() {
         .then(doc => {
             if (doc.exists) {
                 const data = doc.data();
-                
                 let changed = false;
                 
-                // التحقق من التغييرات
                 if (playerWallet.gems !== (data.gems || 0)) {
                     playerWallet.gems = data.gems || 0;
                     changed = true;
@@ -9317,94 +9313,45 @@ function fetchAndUpdatePlayerInfo() {
                 
                 if (changed) {
                     updatePlayerDisplay();
-                    console.log('✅ تم تحديث playerInfo من Firebase');
+                    console.log('✅ Synchronisation réussie');
                 }
             }
         })
-        .catch(err => console.error('❌ خطأ:', err));
+        .catch(err => console.error('❌ Erreur:', err));
 }
 
-// ===== الاستماع المباشر (Real-time) =====
-function startListeningToPlayerInfo() {
-    // إلغاء الاستماع السابق
-    if (unsubscribePlayerInfo) {
-        unsubscribePlayerInfo();
-        unsubscribePlayerInfo = null;
+// ✅ Mise à jour automatique toutes les 3 secondes
+setInterval(() => {
+    if (currentUser) {
+        syncPlayerData();
     }
-    
-    if (!currentUser) return;
-    
-    console.log('👂 بدء الاستماع المباشر لـ Firebase...');
-    
-    unsubscribePlayerInfo = db.collection('users')
-        .doc(currentUser.uid)
-        .onSnapshot((doc) => {
-            if (doc.exists) {
-                const data = doc.data();
-                
-                // تحديث مباشر
-                playerWallet.gems = data.gems || 0;
-                currentUser.score = data.score || 0;
-                currentUser.displayName = data.name || 'زائر';
-                
-                updatePlayerDisplay();
-                console.log('🔄 تحديث فوري:', {
-                    name: currentUser.displayName,
-                    score: currentUser.score,
-                    gems: playerWallet.gems
-                });
-            }
-        }, (error) => {
-            console.error('❌ خطأ في الاستماع:', error);
-        });
-}
+}, 3000);
 
-// ===== ربط مع نظام المصادقة =====
-const originalAuthHandler = auth.onAuthStateChanged;
-auth.onAuthStateChanged = async (user) => {
-    // تنفيذ الدالة الأصلية
-    if (originalAuthHandler) {
-        await originalAuthHandler(user);
-    }
-    
-    if (user) {
-        currentUser = user;
-        console.log('✅ مستخدم مسجل:', user.displayName);
-        
-        // انتظر قليلاً ثم ابدأ الاستماع
-        setTimeout(() => {
-            fetchAndUpdatePlayerInfo();
-            startListeningToPlayerInfo();
-        }, 1000);
-    } else {
-        // إلغاء الاستماع عند الخروج
-        if (unsubscribePlayerInfo) {
-            unsubscribePlayerInfo();
-            unsubscribePlayerInfo = null;
-        }
-        console.log('👂 تم إلغاء الاستماع');
-    }
-};
-
-// ===== تحديث عند العودة للصفحة =====
+// ✅ Mise à jour quand on revient sur la page
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden && currentUser) {
-        console.log('👁️ العودة للصفحة - تحديث البيانات');
-        fetchAndUpdatePlayerInfo();
+        console.log('👁️ Retour - synchronisation');
+        syncPlayerData();
     }
 });
 
-// ===== تحديث عند فتح اللوحات =====
+// ✅ Mise à jour après 1 seconde au chargement
+setTimeout(() => {
+    if (currentUser) {
+        syncPlayerData();
+    }
+}, 1500);
+
+// ✅ Mise à jour quand on ouvre le leaderboard
 const originalShowLeaderboard = window.showLeaderboard;
 window.showLeaderboard = function() {
-    fetchAndUpdatePlayerInfo();
+    syncPlayerData();
     if (originalShowLeaderboard) {
         originalShowLeaderboard();
     }
 };
 
-console.log('✅ تم تفعيل المزامنة المباشرة مع Firebase');
-console.log('💡 أي تغيير في Firebase سيظهر فوراً في الواجهة');
+console.log('✅ Synchronisation active (toutes les 3 secondes)');
     </script>
 
     

@@ -9281,76 +9281,7 @@ function buyGemsDirect(gems, price) {
     }).render('#paypal-button-container');
         }
 
-  // ==========================================
-// SOLUTION DÉFINITIVE - Comme le Leaderboard
-// ==========================================
-
-// Fonction qui lit directement Firebase (comme le Leaderboard)
-function refreshPlayerInfo() {
-    if (!currentUser) {
-        console.log('⚠️ Pas d\'utilisateur');
-        return;
-    }
-    
-    console.log('📡 Lecture directe depuis Firebase...');
-    
-    db.collection('users').doc(currentUser.uid).get()
-        .then(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                
-                // ✅ Mise à jour directe (comme le Leaderboard)
-                playerWallet.gems = data.gems || 0;
-                currentUser.score = data.score || 0;
-                currentUser.displayName = data.name || 'زائر';
-                
-                // ✅ Affichage
-                updatePlayerDisplay();
-                
-                console.log('✅ PlayerInfo mis à jour:', {
-                    name: currentUser.displayName,
-                    score: currentUser.score,
-                    gems: playerWallet.gems
-                });
-            }
-        })
-        .catch(err => console.error('❌ Erreur:', err));
-}
-
-// ===== Mise à jour automatique =====
-
-// 1. Toutes les 5 secondes (comme un rafraîchissement)
-setInterval(() => {
-    if (currentUser) {
-        refreshPlayerInfo();
-    }
-}, 5000);
-
-// 2. Quand on revient sur la page
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && currentUser) {
-        console.log('👁️ Retour sur la page');
-        refreshPlayerInfo();
-    }
-});
-
-// 3. Au chargement
-setTimeout(() => {
-    if (currentUser) {
-        refreshPlayerInfo();
-    }
-}, 1000);
-
-// 4. Quand on ouvre le Leaderboard (comme tu le fais déjà)
-const originalShowLeaderboard = window.showLeaderboard;
-window.showLeaderboard = function() {
-    refreshPlayerInfo(); // ← Met à jour playerInfo en même temps
-    if (originalShowLeaderboard) {
-        originalShowLeaderboard();
-    }
-};
-
-console.log('✅ PlayerInfo lit maintenant Firebase directement (comme Leaderboard)');
+ 
     </script>
 
     
